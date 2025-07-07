@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
 import { realNewsGenerator } from "./services/real-news-generator";
 import { realTimeNewsService } from "./services/real-time-news";
+import { rssFeedService } from "./services/rss-feeds";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -201,10 +202,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function processNewsEvents() {
     try {
-      // Generate articles from real news sources
-      await realNewsGenerator.generateAndSaveArticles();
+      // Generate articles from RSS feeds
+      await rssFeedService.fetchAllFeeds();
     } catch (error) {
-      console.error('Error processing news events:', error);
+      console.error('Error processing RSS feeds:', error);
     }
   }
 
@@ -219,15 +220,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Initial news processing
+  // Initial RSS feed processing
   await processNewsEvents();
 
-  // Process news events every 30 minutes to generate real articles
-  setInterval(processNewsEvents, 30 * 60 * 1000);
+  // Process RSS feeds every 1 hour to generate real articles
+  setInterval(processNewsEvents, 60 * 60 * 1000);
 
-  // Generate real-time news with web grounding every 15 minutes
+  // Generate real-time news with web grounding every 30 minutes
   generateRealTimeNews();
-  setInterval(generateRealTimeNews, 15 * 60 * 1000);
+  setInterval(generateRealTimeNews, 30 * 60 * 1000);
 
   return httpServer;
 }
