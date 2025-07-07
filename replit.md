@@ -87,6 +87,29 @@ The application uses four main entities:
 - **Connection Management**: Automatic reconnection and error handling
 - **Broadcast System**: Efficient message distribution to all clients
 
+## Deployment for Railway
+
+### Automatic Database Setup
+- **Zero Configuration**: Database tables are created automatically on startup
+- **Self-Seeding**: Sample data is populated if no articles exist
+- **Migration System**: Built-in migration system handles schema creation
+- **Environment Ready**: Only requires DATABASE_URL and API keys
+
+### Railway Deployment Steps
+1. Connect your GitHub repository to Railway
+2. Set environment variables:
+   - `DATABASE_URL` (PostgreSQL connection string)
+   - `GEMINI_API_KEY` (Google Gemini API key)
+3. Deploy - everything else is automatic
+
+### What Happens on Deploy
+- Frontend builds with Vite to optimized static files
+- Backend bundles with ESBuild for production
+- Database tables created automatically on first run
+- RSS feeds start pulling real news immediately
+- AI content generation begins
+- WebSocket server starts for live market data
+
 ## Changelog
 
 - July 07, 2025. Initial setup
@@ -109,6 +132,12 @@ The application uses four main entities:
   - Connected Google Gemini AI for article generation
   - Configured automatic news updates every 1 hour from RSS feeds
   - Established real-time market data connections
+- July 07, 2025. Railway deployment preparation
+  - Added automatic database table creation system
+  - Built migration system that runs on server startup
+  - Created data seeding for initial articles and market data
+  - Added Railway configuration files
+  - Made application fully self-contained for zero-config deployment
 
 ## User Preferences
 
