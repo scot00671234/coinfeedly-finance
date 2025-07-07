@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, Bell, User } from "lucide-react";
 
 export default function Header() {
   const [location] = useLocation();
@@ -11,10 +11,13 @@ export default function Header() {
 
   const navigation = [
     { name: 'Home', href: '/' },
+    { name: 'World', href: '/world' },
+    { name: 'US', href: '/us' },
+    { name: 'UK', href: '/uk' },
+    { name: 'Companies', href: '/companies' },
+    { name: 'Tech', href: '/tech' },
     { name: 'Markets', href: '/markets' },
-    { name: 'Articles', href: '/articles' },
     { name: 'Crypto', href: '/crypto' },
-    { name: 'Analysis', href: '/analysis' },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
