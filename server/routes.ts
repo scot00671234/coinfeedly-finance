@@ -220,8 +220,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Initial RSS feed processing
-  await processNewsEvents();
+  // Test route to trigger RSS feed processing
+  app.post("/api/test-rss", async (req, res) => {
+    try {
+      await rssFeedService.fetchAllFeeds();
+      res.json({ message: "RSS feeds processed successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to process RSS feeds" });
+    }
+  });
+
+  // Initial RSS feed processing (async, don't block server startup)
+  processNewsEvents().catch(console.error);
 
   // Process RSS feeds every 1 hour to generate real articles
   setInterval(processNewsEvents, 60 * 60 * 1000);

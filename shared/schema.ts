@@ -41,14 +41,14 @@ export const marketData = pgTable("market_data", {
 
 export const newsEvents = pgTable("news_events", {
   id: serial("id").primaryKey(),
-  headline: text("headline").notNull(),
-  summary: text("summary").notNull(),
-  source: text("source").notNull(), // yahoo, coingecko, etc.
+  headline: text("headline"),
+  description: text("description"),
+  category: text("category"),
+  source: text("source").notNull(),
+  url: text("url"),
   publishedAt: timestamp("published_at").notNull(),
-  symbols: text("symbols").array(), // Related symbols
-  sentiment: text("sentiment"), // positive, negative, neutral
   processed: boolean("processed").default(false),
-  articleId: integer("article_id"), // Generated article ID if processed
+  articleId: integer("article_id"),
 });
 
 export const articlesRelations = relations(articles, ({ one }) => ({

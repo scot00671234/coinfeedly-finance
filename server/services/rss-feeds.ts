@@ -14,7 +14,6 @@ class RSSFeedService {
   
   private feeds: RSSFeed[] = [
     // Financial News
-    { url: 'https://feeds.finance.yahoo.com/rss/2.0/headline', category: 'markets', name: 'Yahoo Finance' },
     { url: 'https://www.reuters.com/markets/us/rss', category: 'markets', name: 'Reuters Markets' },
     { url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html', category: 'markets', name: 'CNBC Markets' },
     
@@ -37,11 +36,9 @@ class RSSFeedService {
     
     // UK News
     { url: 'https://feeds.bbci.co.uk/news/uk/rss.xml', category: 'uk', name: 'BBC UK' },
-    { url: 'https://www.theguardian.com/uk/rss', category: 'uk', name: 'Guardian UK' },
     
     // Companies/Business
-    { url: 'https://feeds.fortune.com/fortune/headlines', category: 'companies', name: 'Fortune' },
-    { url: 'https://www.bloomberg.com/feed/podcast/businessweek-daily.rss', category: 'companies', name: 'Bloomberg' }
+    { url: 'https://www.reuters.com/business/rss', category: 'companies', name: 'Reuters Business' }
   ];
 
   async fetchAllFeeds(): Promise<void> {
@@ -78,8 +75,8 @@ class RSSFeedService {
         
         // Create news event
         const newsEvent: InsertNewsEvent = {
-          title: item.title,
-          description: item.contentSnippet || item.content || '',
+          headline: item.title,
+          description: item.contentSnippet || item.content || item.title,
           category: feed.category,
           source: feed.name,
           url: item.link,

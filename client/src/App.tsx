@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/layout/header";
+import MarketTicker from "@/components/layout/market-ticker";
 import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
 import Articles from "@/pages/articles";
@@ -43,6 +44,7 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen bg-neutral-50">
           <Header />
+          <MarketTicker />
           <main>
             <Router />
           </main>
