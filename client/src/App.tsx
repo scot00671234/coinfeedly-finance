@@ -16,6 +16,7 @@ import UK from "@/pages/uk";
 import Companies from "@/pages/companies";
 import Tech from "@/pages/tech";
 import NotFound from "@/pages/not-found";
+import ArticlePage from "@/pages/article";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/companies" component={Companies} />
       <Route path="/tech" component={Tech} />
       <Route path="/articles" component={Articles} />
+      <Route path="/article/:id" component={ArticlePage} />
       <Route path="/markets" component={Markets} />
       <Route path="/crypto" component={CryptoPage} />
       <Route path="/analysis" component={Analysis} />

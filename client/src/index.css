@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ticker animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 60s linear infinite;
+}
+
 :root {
   --background: hsl(0, 0%, 98%);
   --foreground: hsl(0, 0%, 3.9%);

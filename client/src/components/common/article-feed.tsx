@@ -3,9 +3,15 @@ import { Clock, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import type { Article } from "@shared/schema";
 
-export default function Home() {
+interface ArticleFeedProps {
+  category?: string;
+  title: string;
+  description: string;
+}
+
+export default function ArticleFeed({ category, title, description }: ArticleFeedProps) {
   const { data: articles = [], isLoading } = useQuery<Article[]>({
-    queryKey: ['/api/articles?limit=50'],
+    queryKey: category ? [`/api/articles?category=${category}&limit=50`] : ['/api/articles?limit=50'],
   });
 
   const formatTimeAgo = (date: string) => {
@@ -47,6 +53,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+          <p className="text-gray-600">{description}</p>
+        </div>
+
         {/* Featured Article */}
         {featuredArticle && (
           <div className="mb-12">
@@ -59,9 +71,9 @@ export default function Home() {
                   <TrendingUp className="h-4 w-4 text-red-500" />
                   <span className="text-red-500 text-xs font-semibold">FEATURED</span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
                   {featuredArticle.title}
-                </h1>
+                </h2>
                 <p className="text-lg text-gray-600 mb-6 leading-relaxed">
                   {featuredArticle.summary}
                 </p>
@@ -95,9 +107,9 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <h2 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
                   {article.title}
-                </h2>
+                </h3>
                 
                 <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   {article.summary}
@@ -114,7 +126,7 @@ export default function Home() {
 
         {articles.length === 0 && !isLoading && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No articles available at the moment.</p>
+            <p className="text-gray-500 text-lg">No articles available in this category at the moment.</p>
           </div>
         )}
       </div>

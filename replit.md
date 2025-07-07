@@ -96,7 +96,15 @@ The application uses four main entities:
   - Created featured articles section with sidebar for trending topics
   - Added proper category pages for all news sections
   - Integrated Gemini AI for article generation with API key
+- July 07, 2025. Transformed to clean Bloomberg/Palantir-style article feed
+  - Removed breaking news banners, notifications, and profile elements
+  - Removed all fake market data displays
+  - Created clean, uniform article feed layout for all categories
+  - Integrated real news API service for authentic content generation
+  - Set up automatic news updates every 30 minutes
+  - Simplified all pages to focus purely on article content
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Design preference: Bloomberg/Palantir-style clean article feeds only.

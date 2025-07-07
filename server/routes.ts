@@ -3,9 +3,8 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
-import { yahooFinanceService } from "./services/yahoo-finance";
-import { coinGeckoService } from "./services/coingecko";
-import { articleGenerator } from "./services/article-generator";
+import { realNewsGenerator } from "./services/real-news-generator";
+import { realTimeNewsService } from "./services/real-time-news";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -202,36 +201,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function processNewsEvents() {
     try {
-      const unprocessedEvents = await storage.getUnprocessedNewsEvents();
-      
-      for (const event of unprocessedEvents) {
-        // Generate article from news event
-        const article = await articleGenerator.generateArticle(event);
-        
-        if (article) {
-          const createdArticle = await storage.createArticle(article);
-          await storage.markNewsEventProcessed(event.id, createdArticle.id);
-          
-          // Broadcast new article to WebSocket clients
-          broadcast({
-            type: 'new-article',
-            data: createdArticle
-          });
-          
-          console.log(`Generated article: ${createdArticle.title}`);
-        }
-      }
+      // Generate articles from real news sources
+      await realNewsGenerator.generateAndSaveArticles();
     } catch (error) {
       console.error('Error processing news events:', error);
     }
   }
 
-  // Initialize market data and start real-time updates
-  await fetchAndUpdateMarketData();
-  
-  // Set up periodic updates
-  setInterval(fetchAndUpdateMarketData, 30000); // Every 30 seconds
-  setInterval(processNewsEvents, 60000); // Every minute
+  // Generate real-time news with web grounding
+  async function generateRealTimeNews() {
+    try {
+      console.log('Generating real-time news with web grounding...');
+      await realTimeNewsService.generateRealTimeArticles();
+      console.log('Real-time news generation completed');
+    } catch (error) {
+      console.error('Error generating real-time news:', error);
+    }
+  }
+
+  // Initial news processing
+  await processNewsEvents();
+
+  // Process news events every 30 minutes to generate real articles
+  setInterval(processNewsEvents, 30 * 60 * 1000);
+
+  // Generate real-time news with web grounding every 15 minutes
+  generateRealTimeNews();
+  setInterval(generateRealTimeNews, 15 * 60 * 1000);
 
   return httpServer;
 }

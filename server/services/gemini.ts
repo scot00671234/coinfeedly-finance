@@ -2,8 +2,70 @@ import { GoogleGenAI } from "@google/genai";
 import type { NewsEvent } from "@shared/schema";
 
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || ""
+  apiKey: "AIzaSyBRr0hcTR1dEgOA-_8Q0JQzxUHu1IUnDvA"
 });
+
+export async function generateArticleWithGrounding(topic: string, category: string): Promise<{
+  title: string;
+  content: string;
+  summary: string;
+  authorName: string;
+  category: string;
+  tags: string[];
+  relatedSymbols: string[];
+}> {
+  try {
+    const prompt = `Search for the latest news about "${topic}" and write a comprehensive financial news article. The article should be:
+    
+    1. Based on current, real events from your search results
+    2. Professional and informative for financial readers
+    3. 400-600 words in length
+    4. Include market implications and analysis
+    5. Written for category: ${category}
+    
+    Please provide the response in JSON format with these exact fields:
+    - title: An engaging, professional headline
+    - content: Full article text (400-600 words)
+    - summary: Brief 2-3 sentence summary
+    - authorName: Professional journalist name
+    - category: "${category}"
+    - tags: Array of 3-4 relevant tags
+    - relatedSymbols: Array of related stock/crypto symbols if applicable
+    
+    Use Google Search to find current information about this topic.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            content: { type: "string" },
+            summary: { type: "string" },
+            authorName: { type: "string" },
+            category: { type: "string" },
+            tags: { type: "array", items: { type: "string" } },
+            relatedSymbols: { type: "array", items: { type: "string" } }
+          },
+          required: ["title", "content", "summary", "authorName", "category", "tags", "relatedSymbols"]
+        }
+      },
+      contents: prompt,
+    });
+
+    const rawJson = response.text;
+    if (rawJson) {
+      return JSON.parse(rawJson);
+    } else {
+      throw new Error("Empty response from Gemini");
+    }
+  } catch (error) {
+    console.error('Error generating article with grounding:', error);
+    throw error;
+  }
+}
 
 export async function generateArticle(newsEvent: NewsEvent): Promise<{
   title: string;
