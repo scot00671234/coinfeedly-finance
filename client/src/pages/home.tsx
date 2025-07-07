@@ -45,67 +45,87 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Featured Article */}
         {featuredArticle && (
-          <div className="mb-12">
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="p-8">
-                <div className="flex items-center space-x-2 mb-4">
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded uppercase">
-                    {featuredArticle.category}
-                  </span>
-                  <TrendingUp className="h-4 w-4 text-red-500" />
-                  <span className="text-red-500 text-xs font-semibold">FEATURED</span>
-                </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-                  {featuredArticle.title}
-                </h1>
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  {featuredArticle.summary}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span className="font-medium">{featuredArticle.authorName}</span>
-                  <div className="flex items-center space-x-4">
+          <div className="border-b border-gray-200 pb-8 mb-8">
+            <Link href={`/articles/${featuredArticle.id}`}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 cursor-pointer hover:opacity-90 transition-opacity">
+                {featuredArticle.imageUrl && (
+                  <div className="lg:order-2">
+                    <img 
+                      src={featuredArticle.imageUrl} 
+                      alt={featuredArticle.title}
+                      className="w-full h-80 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                <div className="lg:order-1 flex flex-col justify-center">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
+                      FEATURED
+                    </span>
+                    <span className="text-blue-600 text-sm font-semibold uppercase tracking-wide">
+                      {featuredArticle.category}
+                    </span>
+                  </div>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                    {featuredArticle.title}
+                  </h1>
+                  <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+                    {featuredArticle.summary}
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500 space-x-4">
+                    <span className="font-medium">{featuredArticle.authorName}</span>
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
+                      <Clock className="w-4 h-4 mr-1" />
                       {formatTimeAgo(featuredArticle.publishedAt)}
                     </div>
-                    <span>{featuredArticle.views} views</span>
+                    <div className="flex items-center">
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                      {featuredArticle.viewCount || 0} views
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         )}
 
         {/* Article Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {regularArticles.map((article) => (
-            <Link key={article.id} href={`/article/${article.id}`}>
-              <article className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer">
-                <div className="flex items-center space-x-2 mb-3">
-                  <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded uppercase">
-                    {article.category}
-                  </span>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {formatTimeAgo(article.publishedAt)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {regularArticles.slice(0, 12).map((article) => (
+            <Link key={article.id} href={`/articles/${article.id}`}>
+              <article className="cursor-pointer group">
+                {article.imageUrl && (
+                  <div className="mb-4">
+                    <img 
+                      src={article.imageUrl} 
+                      alt={article.title}
+                      className="w-full h-48 object-cover rounded group-hover:opacity-90 transition-opacity"
+                    />
                   </div>
-                </div>
-                
-                <h2 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
-                  {article.title}
-                </h2>
-                
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                  {article.summary}
-                </p>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="font-medium">{article.authorName}</span>
-                  <span>{article.views} views</span>
+                )}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-blue-600 text-xs font-bold uppercase tracking-wide">
+                      {article.category}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
+                    {article.title}
+                  </h2>
+                  <p className="text-gray-600 leading-relaxed line-clamp-3">
+                    {article.summary}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
+                    <span className="font-medium">{article.authorName}</span>
+                    <div className="flex items-center space-x-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{formatTimeAgo(article.publishedAt)}</span>
+                    </div>
+                  </div>
                 </div>
               </article>
             </Link>
