@@ -90,6 +90,12 @@ The application uses four main entities:
 ## Changelog
 
 - July 07, 2025. Initial setup
+- July 07, 2025. Redesigned homepage as modern news front page
+  - Removed black hero section and created newspaper-style layout
+  - Added category navigation: World, US, UK, Companies, Tech, Markets, Crypto
+  - Created featured articles section with sidebar for trending topics
+  - Added proper category pages for all news sections
+  - Integrated Gemini AI for article generation with API key
 
 ## User Preferences
 
