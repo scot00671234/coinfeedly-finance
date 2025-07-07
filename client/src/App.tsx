@@ -29,7 +29,7 @@ function Router() {
       <Route path="/companies" component={Companies} />
       <Route path="/tech" component={Tech} />
       <Route path="/articles" component={Articles} />
-      <Route path="/article/:id" component={ArticlePage} />
+      <Route path="/articles/:id" component={ArticlePage} />
       <Route path="/markets" component={Markets} />
       <Route path="/crypto" component={CryptoPage} />
       <Route path="/analysis" component={Analysis} />

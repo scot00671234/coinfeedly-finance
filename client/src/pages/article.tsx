@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import type { Article } from "@shared/schema";
 
 export default function ArticlePage() {
-  const [match, params] = useRoute('/article/:id');
+  const [match, params] = useRoute('/articles/:id');
   const articleId = params?.id;
 
   const { data: article, isLoading } = useQuery<Article>({
@@ -27,7 +27,7 @@ export default function ArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 rounded w-3/4"></div>
@@ -46,7 +46,7 @@ export default function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Article Not Found</h1>
           <p className="text-gray-600 mb-6">The article you're looking for doesn't exist.</p>
@@ -62,112 +62,102 @@ export default function ArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back button */}
-        <div className="mb-6">
+        <div className="mb-8">
           <Link href="/">
-            <span className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <span className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Articles
+              Back to Home
             </span>
           </Link>
         </div>
 
-        {/* Article header */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          {article.imageUrl && (
-            <img 
-              src={article.imageUrl} 
-              alt={article.title}
-              className="w-full h-64 object-cover"
-            />
-          )}
-          
-          <div className="p-8">
-            {/* Category badge */}
-            <div className="mb-4">
-              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full uppercase">
+        <article className="max-w-none">
+          {/* Article header */}
+          <div className="mb-8">
+            <div className="flex items-center space-x-3 mb-4">
+              <span className="text-blue-600 text-sm font-bold uppercase tracking-wide">
                 {article.category}
               </span>
+              {article.featured && (
+                <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
+                  FEATURED
+                </span>
+              )}
             </div>
-
-            {/* Title */}
-            <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               {article.title}
             </h1>
-
-            {/* Meta information */}
+            
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              {article.summary}
+            </p>
+            
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
-              <div className="flex items-center space-x-6">
-                <span className="font-medium text-gray-900">By {article.authorName}</span>
-                <div className="flex items-center text-gray-500">
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="font-medium">{article.authorName}</span>
+                <span className="mx-3">•</span>
+                <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
                   {formatTimeAgo(article.publishedAt)}
                 </div>
-                <div className="flex items-center text-gray-500">
-                  <Eye className="h-4 w-4 mr-1" />
-                  {article.views} views
-                </div>
               </div>
               
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                <Share2 className="h-4 w-4" />
-                <span className="text-sm font-medium">Share</span>
-              </button>
+              <div className="flex items-center space-x-6 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <Eye className="h-4 w-4 mr-1" />
+                  {article.viewCount || 0} views
+                </div>
+                <button className="flex items-center hover:text-blue-600 transition-colors">
+                  <Share2 className="h-4 w-4 mr-1" />
+                  Share
+                </button>
+              </div>
             </div>
+          </div>
 
-            {/* Summary */}
+          {/* Article image */}
+          {article.imageUrl && (
             <div className="mb-8">
-              <p className="text-xl text-gray-700 leading-relaxed font-medium">
-                {article.summary}
-              </p>
+              <img 
+                src={article.imageUrl} 
+                alt={article.title}
+                className="w-full h-96 object-cover rounded-lg"
+              />
             </div>
-
-            {/* Article content */}
-            <div className="prose prose-lg max-w-none">
-              {article.content.split('\n').map((paragraph, index) => (
-                <p key={index} className="mb-4 text-gray-800 leading-relaxed">
+          )}
+          
+          {/* Article content */}
+          <div className="prose prose-lg max-w-none">
+            <div className="text-gray-800 leading-relaxed space-y-6">
+              {article.content?.split('\n\n').map((paragraph, index) => (
+                <p key={index} className="text-lg leading-relaxed mb-6">
                   {paragraph}
                 </p>
               ))}
             </div>
-
-            {/* Tags */}
-            {article.tags && article.tags.length > 0 && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Related Topics</h3>
-                <div className="flex flex-wrap gap-2">
-                  {article.tags.map((tag) => (
-                    <span 
-                      key={tag}
-                      className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Related symbols */}
-            {article.relatedSymbols && article.relatedSymbols.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Related Symbols</h3>
-                <div className="flex flex-wrap gap-2">
-                  {article.relatedSymbols.map((symbol) => (
-                    <span 
-                      key={symbol}
-                      className="bg-blue-100 text-blue-700 text-sm font-mono px-3 py-1 rounded"
-                    >
-                      {symbol}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+
+          {/* Article tags */}
+          {article.tags && article.tags.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Related Topics</h3>
+              <div className="flex flex-wrap gap-2">
+                {article.tags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </article>
       </div>
     </div>
   );
