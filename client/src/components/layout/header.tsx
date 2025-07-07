@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Bell, User, Menu, X } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 
 export default function Header() {
   const [location] = useLocation();
@@ -67,13 +67,7 @@ export default function Header() {
               />
             </form>
             
-            <Button variant="ghost" size="sm">
-              <Bell className="h-5 w-5" />
-            </Button>
-            
-            <Button variant="ghost" size="sm">
-              <User className="h-5 w-5" />
-            </Button>
+
           </div>
 
           {/* Mobile Menu Button */}

@@ -8,6 +8,8 @@ import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
 import Articles from "@/pages/articles";
 import Markets from "@/pages/markets";
+import CryptoPage from "@/pages/crypto";
+import Analysis from "@/pages/analysis";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/articles" component={Articles} />
       <Route path="/markets" component={Markets} />
+      <Route path="/crypto" component={CryptoPage} />
+      <Route path="/analysis" component={Analysis} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -25,7 +29,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-neutral-50">
           <Header />
           <main>
             <Router />
