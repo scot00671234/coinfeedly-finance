@@ -4,26 +4,25 @@ import { users, articles, marketData, newsEvents } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 
 export async function runMigrations() {
-  try {
-    console.log('🔄 Running database migrations...');
-    
-    // Test database connection first
-    await pool.query('SELECT 1');
-    console.log('✅ Database connection successful');
-    
-    // Run Drizzle migrations
-    await migrate(db, { migrationsFolder: './drizzle' });
-    
-    console.log('✅ Database migrations completed successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    console.error('Error details:', error.message);
-    
-    // Fallback: Try to create tables manually if migrations fail
+  let retryCount = 0;
+  const maxRetries = 3;
+  
+  while (retryCount < maxRetries) {
     try {
-      console.log('🔄 Attempting fallback table creation...');
+      console.log(`🔄 Running database migrations... (attempt ${retryCount + 1}/${maxRetries})`);
       
+      // Test database connection first with timeout
+      const connectionTest = await Promise.race([
+        pool.query('SELECT 1'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000))
+      ]);
+      
+      console.log('✅ Database connection successful');
+      
+      // Direct table creation for Railway compatibility
+      console.log('🔄 Creating database tables...');
+      
+      // Create tables in correct order (dependencies first)
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
@@ -31,6 +30,7 @@ export async function runMigrations() {
           password TEXT NOT NULL
         )
       `);
+      console.log('✅ Created users table');
 
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS news_events (
@@ -45,6 +45,7 @@ export async function runMigrations() {
           article_id INTEGER
         )
       `);
+      console.log('✅ Created news_events table');
 
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS articles (
@@ -63,6 +64,7 @@ export async function runMigrations() {
           share_count INTEGER DEFAULT 0
         )
       `);
+      console.log('✅ Created articles table');
 
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS market_data (
@@ -80,14 +82,34 @@ export async function runMigrations() {
           UNIQUE(symbol, type)
         )
       `);
+      console.log('✅ Created market_data table');
 
-      console.log('✅ Fallback table creation completed');
+      // Create indexes for better performance
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category)`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(featured)`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at)`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_news_events_processed ON news_events(processed)`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_market_data_symbol ON market_data(symbol)`);
+      console.log('✅ Created database indexes');
+
+      console.log('✅ Database migrations completed successfully');
       return true;
-    } catch (fallbackError) {
-      console.error('❌ Fallback migration also failed:', fallbackError);
-      return false;
+      
+    } catch (error) {
+      retryCount++;
+      console.error(`❌ Migration attempt ${retryCount} failed:`, error.message);
+      
+      if (retryCount < maxRetries) {
+        console.log(`⏳ Retrying in ${retryCount * 2} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
+      } else {
+        console.error('❌ All migration attempts failed');
+        return false;
+      }
     }
   }
+  
+  return false;
 }
 
 export async function seedInitialData() {

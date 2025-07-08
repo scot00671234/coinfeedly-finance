@@ -41,27 +41,15 @@ app.use((req, res, next) => {
   // Run database migrations and seed data on startup
   console.log('🚀 Starting Coin Feedly server...');
   
-  // Wait for database to be ready with retries
-  let retries = 5;
-  let migrationsSuccess = false;
-  
-  while (retries > 0 && !migrationsSuccess) {
-    try {
-      migrationsSuccess = await runMigrations();
-      if (migrationsSuccess) {
-        await seedInitialData();
-        break;
-      }
-    } catch (error) {
-      console.log(`Database not ready, retrying in 2 seconds... (${retries} retries left)`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      retries--;
-    }
-  }
+  // Initialize database with proper error handling
+  const migrationsSuccess = await runMigrations();
   
   if (!migrationsSuccess) {
-    console.error('❌ Failed to initialize database after all retries');
-    process.exit(1);
+    console.error('❌ Failed to initialize database - starting server without seeding');
+    // Continue with server startup even if migrations fail
+  } else {
+    // Only seed data if migrations were successful
+    await seedInitialData();
   }
   
   const server = await registerRoutes(app);

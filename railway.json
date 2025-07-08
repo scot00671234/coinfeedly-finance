@@ -1,17 +1,13 @@
 {
   "name": "coinfeedly-finance",
   "build": {
-    "builder": "nixpacks",
-    "buildCommand": "npm run build",
-    "startCommand": "npm start"
+    "builder": "nixpacks"
   },
   "deploy": {
     "numReplicas": 1,
-    "restartPolicyType": "on-failure",
-    "restartPolicyMaxRetries": 3
-  },
-  "environment": {
-    "NODE_ENV": "production",
-    "PORT": "8080"
+    "restartPolicy": {
+      "type": "on-failure",
+      "maxRetries": 3
+    }
   }
 }
