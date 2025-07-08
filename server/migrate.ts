@@ -1,3 +1,4 @@
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { db, pool } from './db';
 import { users, articles, marketData, newsEvents } from '@shared/schema';
 import { sql } from 'drizzle-orm';
@@ -10,91 +11,82 @@ export async function runMigrations() {
     await pool.query('SELECT 1');
     console.log('✅ Database connection successful');
     
-    // Create tables if they don't exist with proper schema mapping
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL
-      )
-    `);
-
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS news_events (
-        id SERIAL PRIMARY KEY,
-        headline TEXT,
-        description TEXT,
-        category TEXT,
-        source TEXT NOT NULL,
-        url TEXT,
-        published_at TIMESTAMP WITH TIME ZONE NOT NULL,
-        processed BOOLEAN DEFAULT FALSE,
-        article_id INTEGER
-      )
-    `);
-
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS articles (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        summary TEXT NOT NULL,
-        category TEXT NOT NULL,
-        author_name TEXT NOT NULL,
-        published_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-        image_url TEXT,
-        featured BOOLEAN DEFAULT FALSE,
-        tags TEXT[],
-        related_symbols TEXT[],
-        view_count INTEGER DEFAULT 0,
-        share_count INTEGER DEFAULT 0
-      )
-    `);
-
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS market_data (
-        id SERIAL PRIMARY KEY,
-        symbol TEXT NOT NULL,
-        name TEXT NOT NULL,
-        price DECIMAL(18,8) NOT NULL,
-        change DECIMAL(18,8) NOT NULL,
-        change_percent DECIMAL(10,4) NOT NULL,
-        volume DECIMAL(20,2),
-        market_cap DECIMAL(20,2),
-        type TEXT NOT NULL,
-        last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-        metadata JSONB,
-        UNIQUE(symbol, type)
-      )
-    `);
-
-    // Add indexes for better performance
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category);
-    `);
+    // Run Drizzle migrations
+    await migrate(db, { migrationsFolder: './drizzle' });
     
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(featured);
-    `);
-    
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at);
-    `);
-    
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_news_events_processed ON news_events(processed);
-    `);
-    
-    await db.execute(sql`
-      CREATE INDEX IF NOT EXISTS idx_market_data_symbol ON market_data(symbol);
-    `);
-
     console.log('✅ Database migrations completed successfully');
     return true;
   } catch (error) {
     console.error('❌ Migration failed:', error);
     console.error('Error details:', error.message);
-    return false;
+    
+    // Fallback: Try to create tables manually if migrations fail
+    try {
+      console.log('🔄 Attempting fallback table creation...');
+      
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL
+        )
+      `);
+
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS news_events (
+          id SERIAL PRIMARY KEY,
+          headline TEXT,
+          description TEXT,
+          category TEXT,
+          source TEXT NOT NULL,
+          url TEXT,
+          published_at TIMESTAMP WITH TIME ZONE NOT NULL,
+          processed BOOLEAN DEFAULT FALSE,
+          article_id INTEGER
+        )
+      `);
+
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS articles (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          summary TEXT NOT NULL,
+          category TEXT NOT NULL,
+          author_name TEXT NOT NULL,
+          published_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+          image_url TEXT,
+          featured BOOLEAN DEFAULT FALSE,
+          tags TEXT[],
+          related_symbols TEXT[],
+          view_count INTEGER DEFAULT 0,
+          share_count INTEGER DEFAULT 0
+        )
+      `);
+
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS market_data (
+          id SERIAL PRIMARY KEY,
+          symbol TEXT NOT NULL,
+          name TEXT NOT NULL,
+          price DECIMAL(18,8) NOT NULL,
+          change DECIMAL(18,8) NOT NULL,
+          change_percent DECIMAL(10,4) NOT NULL,
+          volume DECIMAL(20,2),
+          market_cap DECIMAL(20,2),
+          type TEXT NOT NULL,
+          last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+          metadata JSONB,
+          UNIQUE(symbol, type)
+        )
+      `);
+
+      console.log('✅ Fallback table creation completed');
+      return true;
+    } catch (fallbackError) {
+      console.error('❌ Fallback migration also failed:', fallbackError);
+      return false;
+    }
   }
 }
 

@@ -1,0 +1,390 @@
+Coin Feedly
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+26 days or $4.73 left
+
+
+Share
+
+
+
+
+
+
+
+
+Activity
+
+coinfeedly-finance
+
+Deployment failed
+
+85 seconds ago
+
+coinfeedly-finance
+
+Deployment successful
+
+23 mins ago
+
+coinfeedly-finance
+
+Deployment successful
+
+24 mins ago
+
+
+1 change in coinfeedly-finance
+
+scot00671234
+
+·
+24 mins ago
+
+Postgres
+
+Deployment successful
+
+25 mins ago
+
+
+Deploy PostgreSQL
+
+1 service and 1 volume updated
+scot00671234
+
+·
+25 mins ago
+
+coinfeedly-finance
+
+Deployment successful
+
+25 mins ago
+
+
+5 changes in coinfeedly-finance
+
+scot00671234
+
+·
+25 mins ago
+
+
+5 changes across 3 services and 1 volume
+
+scot00671234
+
+·
+42 hours ago
+
+lejeboligdevv20
+
+Deployment failed
+
+2 days ago
+
+lejeboligdevv20
+
+Deployment failed
+
+2 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+
+Fetch More
+
+coinfeedly-finance
+Deployments
+Variables
+Metrics
+Settings
+coinfeedly-finance-production.up.railway.app
+22.17.0node@22.17.0
+europe-west4-drams3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+coinfeedly-finance
+/
+2327011
+Jul 9, 2025 12:55 AM
+
+Active
+
+coinfeedly-finance-production.up.railway.app
+
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+
+Filter
+Filter logs using "", (), AND, OR, -
+
+
+
+You reached the start of the range → Jul 9, 2025 12:55 AM
+
+      close: [Function],
+
+      open: [Function]
+
+    },
+
+    _eventsCount: 4,
+
+    _maxListeners: undefined,
+
+    _binaryType: 'arraybuffer',
+
+    _closeCode: 1006,
+
+    _closeFrameReceived: false,
+
+    _closeFrameSent: false,
+
+    _closeMessage: <Buffer >,
+
+    _closeTimer: null,
+
+    _errorEmitted: true,
+
+    _extensions: {},
+
+    _paused: false,
+
+    _protocol: '',
+
+    _readyState: 3,
+
+    _receiver: null,
+
+    _sender: null,
+
+    _socket: null,
+
+    _bufferedAmount: 0,
+
+    _isServer: false,
+
+    _redirects: 0,
+
+    _autoPong: true,
+
+    _url: 'wss://postgres.railway.internal/v2',
+
+    _req: null,
+
+    [Symbol(shapeMode)]: false,
+
+    [Symbol(kCapture)]: false
+
+  },
+
+  [Symbol(kType)]: 'error',
+
+  [Symbol(kError)]: Error: connect ECONNREFUSED fd12:8372:7a77:0:1000:2e:7442:5959:443
+
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+
+    errno: -111,
+
+    code: 'ECONNREFUSED',
+
+    syscall: 'connect',
+
+    address: 'fd12:8372:7a77:0:1000:2e:7442:5959',
+
+    port: 443
+
+  },
+
+  [Symbol(kMessage)]: 'connect ECONNREFUSED fd12:8372:7a77:0:1000:2e:7442:5959:443'
+
+}
+
+Generating article for: American employment statistics
+
+Error generating article for DeFi protocol developments: ErrorEvent {
+
+  [Symbol(kTarget)]: WebSocket {
+
+    _events: [Object: null prototype] {
+
+      error: [Function],
+
+      message: [Function],
+
+      close: [Function],
+
+      open: [Function]
+
+    },
+
+    _eventsCount: 4,
+
+    _maxListeners: undefined,
+
+    _binaryType: 'arraybuffer',
+
+    _closeCode: 1006,
+
+    _closeFrameReceived: false,
+
+    _closeFrameSent: false,
+
+    _closeMessage: <Buffer >,
+
+    _closeTimer: null,
+
+    _errorEmitted: true,
+
+    _extensions: {},
+
+    _paused: false,
+
+    _protocol: '',
+
+    _readyState: 3,
+
+    _receiver: null,
+
+    _sender: null,
+
+    _socket: null,
+
+    _bufferedAmount: 0,
+
+    _isServer: false,
+
+    _redirects: 0,
+
+    _autoPong: true,
+
+    _url: 'wss://postgres.railway.internal/v2',
+
+    _req: null,
+
+    [Symbol(shapeMode)]: false,
+
+    [Symbol(kCapture)]: false
+
+  },
+
+  [Symbol(kType)]: 'error',
+
+  [Symbol(kError)]: Error: connect ECONNREFUSED fd12:8372:7a77:0:1000:2e:7442:5959:443
+
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+
+    errno: -111,
+
+    code: 'ECONNREFUSED',
+
+    syscall: 'connect',
+
+    address: 'fd12:8372:7a77:0:1000:2e:7442:5959',
+
+    port: 443
+
+  },
+
+  [Symbol(kMessage)]: 'connect ECONNREFUSED fd12:8372:7a77:0:1000:2e:7442:5959:443'
+
+}
+
+Error generating article for American employment statistics: ErrorEvent {
+
+  [Symbol(kTarget)]: WebSocket {
+
+    _events: [Object: null prototype] {
+
+      error: [Function],
+
+      message: [Function],
+
+      close: [Function],
+
+      open: [Function]
+
+    },
+
+    _eventsCount: 4,
+
+    _maxListeners: undefined,
+
+    _binaryType: 'arraybuffer',
+
+    _closeCode: 1006,
+
+    _closeFrameReceived: false,
+
+    _closeFrameSent: false,
+
+    _closeMessage: <Buffer >,
+
+    _closeTimer: null,
+
+    _errorEmitted: true,
+
+    _extensions: {},
+
+
+coinfeedly-finance | Railway

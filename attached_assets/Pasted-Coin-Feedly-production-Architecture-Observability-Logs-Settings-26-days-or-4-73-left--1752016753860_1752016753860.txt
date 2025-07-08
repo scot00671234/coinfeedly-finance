@@ -1,0 +1,281 @@
+Coin Feedly
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+26 days or $4.73 left
+
+
+Share
+
+
+
+
+
+
+
+
+Activity
+
+coinfeedly-finance
+
+Deployment failed
+
+2 mins ago
+
+coinfeedly-finance
+
+Deployment successful
+
+24 mins ago
+
+coinfeedly-finance
+
+Deployment successful
+
+25 mins ago
+
+
+1 change in coinfeedly-finance
+
+scot00671234
+
+·
+25 mins ago
+
+Postgres
+
+Deployment successful
+
+25 mins ago
+
+
+Deploy PostgreSQL
+
+1 service and 1 volume updated
+scot00671234
+
+·
+25 mins ago
+
+coinfeedly-finance
+
+Deployment successful
+
+25 mins ago
+
+
+5 changes in coinfeedly-finance
+
+scot00671234
+
+·
+25 mins ago
+
+
+5 changes across 3 services and 1 volume
+
+scot00671234
+
+·
+42 hours ago
+
+lejeboligdevv20
+
+Deployment failed
+
+2 days ago
+
+lejeboligdevv20
+
+Deployment failed
+
+2 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+lejeboligdevv20
+
+Deployment restarted
+
+3 days ago
+
+
+Fetch More
+
+
+Postgres
+Deployments
+Data
+Backups
+Variables
+Metrics
+Settings
+maglev.proxy.rlwy.net
+
+europe-west4-drams3a
+1 Replica
+
+
+
+
+Postgres
+/
+b88b5b2
+Jul 9, 2025 12:54 AM
+
+Active
+
+
+Details
+Build Logs
+Deploy Logs
+
+Filter
+Filter logs using "", (), AND, OR, -
+
+
+
+You reached the start of the range → Jul 9, 2025 12:54 AM
+
+++++++++++
+
++...+.+...
+
+++++++++++
+
+........+.
+
+........+.
+
++.........
+
+....+.....
+
+..........
+
+....+.....
+
+....+.....
+
+...........
+
+..+...+....
+
+...+.....+
+
+...+......
+
+...+..+....
+
++.+......+
+
++.........
+
+..+.......
+
+........+.
+
+...+.....+
+
++....+.....
+
+.+.....+..
+
+.....+..+.
+
+....+.....
+
+..........
+
++......+..
+
+.+.....+..
+
+.....+...+
+
++..+....+.
+
+.......+..
+
+.+....+...
+
+.....+.+..
+
++....+...+
+
+..+.+..+..
+
+.....+.....
+
+.+........
+
++....+....
+
+....+...+.
+
+...+...+..
+
+..........
+
++..+...+...
+
+2025-07-08 22:54:14.659 UTC [47] LOG:  checkpoint complete: wrote 922 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.086 s, sync=0.181 s, total=0.327 s; sync files=301, longest=0.148 s, average=0.001 s; distance=4255 kB, estimate=4255 kB; lsn=0/1912100, redo lsn=0/1912100
+
+2025-07-08 22:54:14.671 UTC [46] LOG:  database system is shut down
+
+ 
+
+PostgreSQL init process complete; ready for start up.
+
+ 
+
+ done
+
+server stopped
+
+2025-07-08 22:54:14.770 UTC [3] LOG:  starting PostgreSQL 16.8 (Debian 16.8-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+
+2025-07-08 22:54:14.770 UTC [3] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+
+2025-07-08 22:54:14.770 UTC [3] LOG:  listening on IPv6 address "::", port 5432
+
+2025-07-08 22:54:14.783 UTC [3] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+
+2025-07-08 22:54:14.817 UTC [76] LOG:  database system was shut down at 2025-07-08 22:54:14 UTC
+
+2025-07-08 22:54:14.835 UTC [3] LOG:  database system is ready to accept connections
+
+2025-07-08 22:59:14.917 UTC [74] LOG:  checkpoint starting: time
+
+2025-07-08 22:59:19.172 UTC [74] LOG:  checkpoint complete: wrote 45 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.221 s, sync=0.017 s, total=4.256 s; sync files=12, longest=0.010 s, average=0.002 s; distance=260 kB, estimate=260 kB; lsn=0/1953520, redo lsn=0/19534E8
+
+
+Postgres | Railway
+3
