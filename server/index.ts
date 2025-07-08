@@ -41,15 +41,23 @@ app.use((req, res, next) => {
   // Run database migrations and seed data on startup
   console.log('🚀 Starting Coin Feedly server...');
   
-  // Initialize database with proper error handling
+  // Railway database initialization
+  console.log('🚀 Initializing Railway database...');
   const migrationsSuccess = await runMigrations();
   
   if (!migrationsSuccess) {
-    console.error('❌ Failed to initialize database - starting server without seeding');
-    // Continue with server startup even if migrations fail
+    console.error('❌ Railway database setup failed - server starting in degraded mode');
+    console.error('The app will still serve static files but database features will be unavailable');
+    // Continue with server startup for debugging
   } else {
-    // Only seed data if migrations were successful
-    await seedInitialData();
+    console.log('✅ Railway database ready - seeding initial data...');
+    try {
+      await seedInitialData();
+      console.log('✅ Railway deployment fully initialized');
+    } catch (seedError) {
+      console.error('❌ Data seeding failed:', seedError.message);
+      console.log('✅ Server will still start with empty database');
+    }
   }
   
   const server = await registerRoutes(app);

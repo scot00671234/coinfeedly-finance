@@ -2,7 +2,8 @@
 cmd = "npm run build"
 
 [phases.start]
-cmd = "npm start"
+cmd = "NODE_ENV=production node dist/index.js"
 
 [variables]
 NODE_ENV = "production"
+PORT = "8080"

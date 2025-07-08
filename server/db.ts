@@ -8,10 +8,22 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// For Railway deployment compatibility
+// Railway-optimized PostgreSQL connection
 const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Test connection on startup
+pool.on('connect', () => {
+  console.log('✅ PostgreSQL client connected');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ PostgreSQL client error:', err);
 });
 
 export const db = drizzle(pool, { schema });

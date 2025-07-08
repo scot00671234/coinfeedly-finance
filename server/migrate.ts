@@ -1,38 +1,39 @@
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { db, pool } from './db';
 import { users, articles, marketData, newsEvents } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 
 export async function runMigrations() {
   let retryCount = 0;
-  const maxRetries = 3;
+  const maxRetries = 5;
   
   while (retryCount < maxRetries) {
     try {
-      console.log(`🔄 Running database migrations... (attempt ${retryCount + 1}/${maxRetries})`);
+      console.log(`🔄 Railway Database Setup (attempt ${retryCount + 1}/${maxRetries})`);
       
-      // Test database connection first with timeout
+      // Test database connection with extended timeout for Railway
       const connectionTest = await Promise.race([
-        pool.query('SELECT 1'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000))
+        pool.query('SELECT NOW() as current_time'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 15000))
       ]);
       
-      console.log('✅ Database connection successful');
+      console.log('✅ Railway PostgreSQL connection verified');
       
-      // Direct table creation for Railway compatibility
-      console.log('🔄 Creating database tables...');
+      // Railway-specific database setup
+      console.log('🔄 Initializing Railway database schema...');
       
-      // Create tables in correct order (dependencies first)
-      await db.execute(sql`
+      // Create users table
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
           username TEXT UNIQUE NOT NULL,
-          password TEXT NOT NULL
+          password TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
       `);
-      console.log('✅ Created users table');
+      console.log('✅ Users table ready');
 
-      await db.execute(sql`
+      // Create news_events table
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS news_events (
           id SERIAL PRIMARY KEY,
           headline TEXT,
@@ -42,12 +43,14 @@ export async function runMigrations() {
           url TEXT,
           published_at TIMESTAMP WITH TIME ZONE NOT NULL,
           processed BOOLEAN DEFAULT FALSE,
-          article_id INTEGER
+          article_id INTEGER,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
       `);
-      console.log('✅ Created news_events table');
+      console.log('✅ News events table ready');
 
-      await db.execute(sql`
+      // Create articles table
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS articles (
           id SERIAL PRIMARY KEY,
           title TEXT NOT NULL,
@@ -58,15 +61,17 @@ export async function runMigrations() {
           published_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
           image_url TEXT,
           featured BOOLEAN DEFAULT FALSE,
-          tags TEXT[],
-          related_symbols TEXT[],
+          tags TEXT[] DEFAULT '{}',
+          related_symbols TEXT[] DEFAULT '{}',
           view_count INTEGER DEFAULT 0,
-          share_count INTEGER DEFAULT 0
+          share_count INTEGER DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
       `);
-      console.log('✅ Created articles table');
+      console.log('✅ Articles table ready');
 
-      await db.execute(sql`
+      // Create market_data table
+      await pool.query(`
         CREATE TABLE IF NOT EXISTS market_data (
           id SERIAL PRIMARY KEY,
           symbol TEXT NOT NULL,
@@ -79,31 +84,56 @@ export async function runMigrations() {
           type TEXT NOT NULL,
           last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
           metadata JSONB,
-          UNIQUE(symbol, type)
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          CONSTRAINT unique_symbol_type UNIQUE(symbol, type)
         )
       `);
-      console.log('✅ Created market_data table');
+      console.log('✅ Market data table ready');
 
-      // Create indexes for better performance
-      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category)`);
-      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(featured)`);
-      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at)`);
-      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_news_events_processed ON news_events(processed)`);
-      await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_market_data_symbol ON market_data(symbol)`);
-      console.log('✅ Created database indexes');
+      // Create indexes for Railway performance
+      const indexes = [
+        'CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category)',
+        'CREATE INDEX IF NOT EXISTS idx_articles_featured ON articles(featured)',
+        'CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at DESC)',
+        'CREATE INDEX IF NOT EXISTS idx_news_events_processed ON news_events(processed)',
+        'CREATE INDEX IF NOT EXISTS idx_market_data_symbol ON market_data(symbol)',
+        'CREATE INDEX IF NOT EXISTS idx_market_data_type ON market_data(type)'
+      ];
 
-      console.log('✅ Database migrations completed successfully');
-      return true;
+      for (const indexQuery of indexes) {
+        await pool.query(indexQuery);
+      }
+      console.log('✅ Database indexes created');
+
+      // Verify all tables exist
+      const tableCheck = await pool.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name IN ('users', 'articles', 'market_data', 'news_events')
+        ORDER BY table_name
+      `);
+      
+      console.log('✅ Verified tables:', tableCheck.rows.map(row => row.table_name));
+      
+      if (tableCheck.rows.length === 4) {
+        console.log('✅ Railway database initialization completed successfully');
+        return true;
+      } else {
+        throw new Error(`Missing tables. Expected 4, found ${tableCheck.rows.length}`);
+      }
       
     } catch (error) {
       retryCount++;
-      console.error(`❌ Migration attempt ${retryCount} failed:`, error.message);
+      console.error(`❌ Railway setup attempt ${retryCount} failed:`, error.message);
       
       if (retryCount < maxRetries) {
-        console.log(`⏳ Retrying in ${retryCount * 2} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, retryCount * 2000));
+        const waitTime = Math.min(retryCount * 3000, 10000);
+        console.log(`⏳ Retrying Railway setup in ${waitTime/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       } else {
-        console.error('❌ All migration attempts failed');
+        console.error('❌ Railway database setup failed after all attempts');
+        console.error('This may indicate a Railway PostgreSQL configuration issue');
         return false;
       }
     }
