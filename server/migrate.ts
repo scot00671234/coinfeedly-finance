@@ -189,14 +189,12 @@ Looking ahead, market participants will be watching for additional policy announ
         await db.insert(marketData).values({
           symbol: data.symbol,
           name: data.name,
-          price: data.price,
-          changeAmount: data.change,
-          changePercent: data.changePercent,
-          volume: BigInt(Math.floor(Math.random() * 10000000) + 1000000),
-          marketCap: BigInt(Math.floor(Math.random() * 1000000000000) + 100000000000),
-          type: data.type,
-          exchange: data.type === "crypto" ? "Coinbase" : "NASDAQ",
-          currency: "USD"
+          price: data.price.toString(),
+          change: data.change.toString(),
+          changePercent: data.changePercent.toString(),
+          volume: Math.floor(Math.random() * 10000000) + 1000000,
+          marketCap: Math.floor(Math.random() * 1000000000000) + 100000000000,
+          type: data.type
         });
       }
 
