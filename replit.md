@@ -22,10 +22,10 @@ Coin Feedly is a modern financial news platform that provides real-time market d
 - **Content Generation**: Google Gemini AI for article generation
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL hosted on Neon
+- **Primary Database**: PostgreSQL with Railway deployment support
 - **ORM**: Drizzle with schema-first approach
-- **Connection Pool**: Neon serverless connection pooling
-- **Schema Management**: Drizzle migrations for version control
+- **Connection Pool**: Standard PostgreSQL connection pooling
+- **Schema Management**: Automatic table creation on startup
 
 ## Key Components
 
@@ -40,7 +40,7 @@ The application uses four main entities:
 - **Google Gemini AI**: Powers article generation and sentiment analysis
 - **Yahoo Finance API**: Provides stock market data and quotes
 - **CoinGecko API**: Supplies cryptocurrency market information
-- **WebSocket Server**: Enables real-time data broadcasting
+- **WebSocket Server**: Enables real-time data broadcasting (optional for Railway)
 
 ### Frontend Components
 - **Market Ticker**: Live scrolling market data display
@@ -138,6 +138,13 @@ The application uses four main entities:
   - Created data seeding for initial articles and market data
   - Added Railway configuration files
   - Made application fully self-contained for zero-config deployment
+- July 08, 2025. Replit Agent to Replit migration
+  - Migrated from Neon serverless to standard PostgreSQL for Railway compatibility
+  - Fixed database connection issues with proper SSL configuration
+  - Updated migration system with retry logic for Railway deployment
+  - Made WebSocket server optional for Railway environment
+  - Added database connection testing and error handling
+  - Created Railway-specific configuration files
 
 ## User Preferences
 

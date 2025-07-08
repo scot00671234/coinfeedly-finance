@@ -1,5 +1,4 @@
-import { migrate } from 'drizzle-orm/neon-serverless/migrator';
-import { db } from './db';
+import { db, pool } from './db';
 import { users, articles, marketData, newsEvents } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 
@@ -7,7 +6,11 @@ export async function runMigrations() {
   try {
     console.log('🔄 Running database migrations...');
     
-    // Create tables if they don't exist
+    // Test database connection first
+    await pool.query('SELECT 1');
+    console.log('✅ Database connection successful');
+    
+    // Create tables if they don't exist with proper schema mapping
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -19,54 +22,48 @@ export async function runMigrations() {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS news_events (
         id SERIAL PRIMARY KEY,
-        title VARCHAR(500) NOT NULL,
+        headline TEXT,
         description TEXT,
-        category VARCHAR(100) NOT NULL,
-        source VARCHAR(255),
-        url VARCHAR(500),
+        category TEXT,
+        source TEXT NOT NULL,
+        url TEXT,
         published_at TIMESTAMP WITH TIME ZONE NOT NULL,
         processed BOOLEAN DEFAULT FALSE,
-        article_id INTEGER,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        article_id INTEGER
       )
     `);
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS articles (
         id SERIAL PRIMARY KEY,
-        title VARCHAR(500) NOT NULL,
-        summary TEXT NOT NULL,
+        title TEXT NOT NULL,
         content TEXT NOT NULL,
-        category VARCHAR(100) NOT NULL,
-        author_name VARCHAR(255) NOT NULL,
-        published_at TIMESTAMP WITH TIME ZONE NOT NULL,
-        image_url VARCHAR(500),
+        summary TEXT NOT NULL,
+        category TEXT NOT NULL,
+        author_name TEXT NOT NULL,
+        published_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        image_url TEXT,
         featured BOOLEAN DEFAULT FALSE,
         tags TEXT[],
         related_symbols TEXT[],
         view_count INTEGER DEFAULT 0,
-        share_count INTEGER DEFAULT 0,
-        news_event_id INTEGER,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        share_count INTEGER DEFAULT 0
       )
     `);
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS market_data (
         id SERIAL PRIMARY KEY,
-        symbol VARCHAR(20) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        price DECIMAL(15,4) NOT NULL,
-        change_amount DECIMAL(15,4) NOT NULL,
-        change_percent DECIMAL(8,4) NOT NULL,
-        volume BIGINT,
-        market_cap BIGINT,
-        type VARCHAR(50) NOT NULL,
-        exchange VARCHAR(100),
-        currency VARCHAR(10) DEFAULT 'USD',
-        last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        symbol TEXT NOT NULL,
+        name TEXT NOT NULL,
+        price DECIMAL(18,8) NOT NULL,
+        change DECIMAL(18,8) NOT NULL,
+        change_percent DECIMAL(10,4) NOT NULL,
+        volume DECIMAL(20,2),
+        market_cap DECIMAL(20,2),
+        type TEXT NOT NULL,
+        last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        metadata JSONB,
         UNIQUE(symbol, type)
       )
     `);
@@ -96,6 +93,7 @@ export async function runMigrations() {
     return true;
   } catch (error) {
     console.error('❌ Migration failed:', error);
+    console.error('Error details:', error.message);
     return false;
   }
 }

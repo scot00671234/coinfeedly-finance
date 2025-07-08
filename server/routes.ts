@@ -11,30 +11,39 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
-  // WebSocket server for real-time updates
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
-  // Store active WebSocket connections
+  // WebSocket server for real-time updates (optional for Railway)
+  let wss: WebSocketServer | null = null;
   const activeConnections = new Set<WebSocket>();
   
-  wss.on('connection', (ws) => {
-    activeConnections.add(ws);
-    console.log('WebSocket client connected');
+  try {
+    wss = new WebSocketServer({ server: httpServer, path: '/ws' });
     
-    ws.on('close', () => {
-      activeConnections.delete(ws);
-      console.log('WebSocket client disconnected');
+    wss.on('connection', (ws) => {
+      activeConnections.add(ws);
+      console.log('WebSocket client connected');
+      
+      ws.on('close', () => {
+        activeConnections.delete(ws);
+        console.log('WebSocket client disconnected');
+      });
     });
-  });
+    
+    console.log('✅ WebSocket server initialized');
+  } catch (error) {
+    console.log('⚠️ WebSocket server not available (Railway deployment)');
+    wss = null;
+  }
 
-  // Broadcast to all connected clients
+  // Broadcast to all connected clients (if WebSocket is available)
   function broadcast(data: any) {
-    const message = JSON.stringify(data);
-    activeConnections.forEach((ws) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(message);
-      }
-    });
+    if (wss && activeConnections.size > 0) {
+      const message = JSON.stringify(data);
+      activeConnections.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(message);
+        }
+      });
+    }
   }
 
   // Articles API
