@@ -1,5 +1,5 @@
 [phases.build]
-cmd = "npm run build"
+cmd = "vite build && node build-server.js"
 
 [phases.start]
 cmd = "NODE_ENV=production node dist/index.js"
