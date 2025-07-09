@@ -9,9 +9,9 @@ async function buildServer() {
     // Ensure dist directory exists
     mkdirSync('dist', { recursive: true });
     
-    // Build with esbuild - simplified approach for Railway
+    // Build with esbuild - Railway-optimized approach
     await build({
-      entryPoints: ['server/index.railway.ts'],
+      entryPoints: ['server/index.production.ts'],
       bundle: true,
       platform: 'node',
       target: 'node18',
@@ -42,7 +42,7 @@ const __dirname = dirname(__filename);
     // Post-process the built file to ensure Railway compatibility
     let builtCode = readFileSync('dist/index.js', 'utf-8');
     
-    // Fix path resolution issues for Railway environment
+    // Fix common path resolution issues for Railway
     builtCode = builtCode.replace(
       /path\.resolve\(__dirname,\s*"\.\."\)/g,
       'process.cwd()'
@@ -53,20 +53,27 @@ const __dirname = dirname(__filename);
       'path.resolve(process.cwd()'
     );
     
-    // Fix static file serving paths
+    // Fix join operations that reference __dirname
     builtCode = builtCode.replace(
-      /join\(__dirname,\s*"\.\."\s*,\s*"dist"\s*,\s*"public"\)/g,
-      'join(process.cwd(), "dist", "public")'
+      /join\(__dirname,\s*"\.\."\s*,/g,
+      'join(process.cwd(),'
     );
     
+    // Fix import.meta.dirname references
     builtCode = builtCode.replace(
-      /join\(__dirname,\s*"\.\."\s*,\s*"client"\s*,\s*"index\.html"\)/g,
-      'join(process.cwd(), "client", "index.html")'
+      /import\.meta\.dirname/g,
+      'process.cwd()'
     );
     
-    // Ensure all path references use process.cwd() as base
+    // Replace __dirname but not in const declarations
     builtCode = builtCode.replace(
-      /__dirname/g,
+      /const __dirname = dirname\(__filename\);/g,
+      'const __dirname = dirname(__filename);'
+    );
+    
+    // Fix any remaining __dirname references that aren't in const declarations
+    builtCode = builtCode.replace(
+      /(?<!const )__dirname(?! = dirname)/g,
       'process.cwd()'
     );
     
