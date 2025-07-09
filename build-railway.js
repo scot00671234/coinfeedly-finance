@@ -27,7 +27,7 @@ async function buildRailway() {
       entryPoints: ['./server/production-entry.js'],
       bundle: true,
       platform: 'node',
-      target: 'node18',
+      target: 'node20',
       format: 'esm',
       outfile: './dist/server.js',
       packages: 'external',
@@ -60,12 +60,26 @@ const __dirname = dirname(__filename);
     const backendExists = existsSync('./dist/server.js');
     const mainExists = existsSync('./dist/index.js');
     
+    console.log('🔍 Build verification:');
+    console.log('Frontend exists:', frontendExists, './dist/public/index.html');
+    console.log('Backend exists:', backendExists, './dist/server.js');
+    console.log('Main exists:', mainExists, './dist/index.js');
+    
     if (frontendExists && backendExists && mainExists) {
       console.log('✅ Railway build completed successfully!');
       console.log('📁 Frontend: ./dist/public/index.html');
       console.log('📁 Backend: ./dist/server.js');
       console.log('📁 Entry: ./dist/index.js');
     } else {
+      console.log('❌ Missing files detected, checking directory structure...');
+      console.log('Working directory:', process.cwd());
+      console.log('Dist directory contents:');
+      if (existsSync('./dist')) {
+        console.log(require('fs').readdirSync('./dist'));
+        if (existsSync('./dist/public')) {
+          console.log('Public directory contents:', require('fs').readdirSync('./dist/public'));
+        }
+      }
       throw new Error('Build verification failed - missing output files');
     }
     

@@ -1,0 +1,182 @@
+etails
+Build Logs
+Deploy Logs
+HTTP Logs
+
+Filter
+Filter logs using "", (), AND, OR, -
+
+
+
+You reached the start of the range → Jul 9, 2025, 5:13 PM
+
+
+8 vulnerabilities (1 low, 7 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+[stage-0 11/15] RUN --mount=type=cache,id=s/0bc8625e-b1f9-4078-a7f8-f9f81f153d15-/root/npm,target=/root/.npm npm ci  ✔ 12 secs
+
+[stage-0 12/15] COPY . /app/.
+
+[stage-0 12/15] COPY . /app/.  ✔ 189 ms
+
+[stage-0 13/15] RUN --mount=type=cache,id=s/0bc8625e-b1f9-4078-a7f8-f9f81f153d15-node_modules/cache,target=/app/node_modules/.cache npm install && node build-railway.js
+
+npm warn config production Use `--omit=dev` instead.
+
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@google/genai@1.8.0',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+
+up to date, audited 512 packages in 3s
+
+
+
+69 packages are looking for funding
+
+  run `npm fund` for details
+
+
+8 vulnerabilities (1 low, 7 moderate)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+🚀 Building Coin Feedly for Railway deployment...
+
+📦 Building React frontend...
+
+vite v5.4.19 building for production...
+
+transforming...
+
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+✓ 1722 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/public/index.html                   0.63 kB │ gzip:   0.38 kB
+dist/public/assets/index-BED8D0TX.css   88.29 kB │ gzip:  14.36 kB
+
+dist/public/assets/index-mFG4srVg.js   346.22 kB │ gzip: 109.44 kB
+
+✓ built in 4.60s
+
+✅ Frontend build completed
+🔧 Building Express backend...
+
+✅ Backend build completed
+
+📝 Creating main entry point...
+
+❌ Railway build failed: Error: Build verification failed - missing output files
+    at buildRailway (file:///app/build-railway.js:69:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+✕ [stage-0 13/15] RUN --mount=type=cache,id=s/0bc8625e-b1f9-4078-a7f8-f9f81f153d15-node_modules/cache,target=/app/node_modules/.cache npm install && node build-railway.js 
+process "/bin/bash -ol pipefail -c npm install && node build-railway.js" did not complete successfully: exit code: 1
+ 
+
+Dockerfile:33
+
+-------------------
+
+31 |     # build phase
+
+32 |     COPY . /app/.
+
+33 | >>> RUN --mount=type=cache,id=s/0bc8625e-b1f9-4078-a7f8-f9f81f153d15-node_modules/cache,target=/app/node_modules/.cache npm install && node build-railway.js
+
+34 |
+
+35 |
+
+-------------------
+
+ERROR: failed to build: failed to solve: process "/bin/bash -ol pipefail -c npm install && node build-railway.js" did not complete successfully: exit code: 1
+
+Error: Docker build failed
+
+
+Build failed with 1 error
+[stage-0 13/15] RUN --mount=type=cache,id=s/0bc8625e-b1f9-4078-a7f8-f9f81f153d15-node_modules/cache,target=/app/node_modules/.cache npm install && node build-railway.js
+"npm install && node build-railway.js" did not complete successfully: exit code: 1
+
+View in context
+Truncated to 21 lines
+
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@google/genai@1.8.0',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.5', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+up to date, audited 512 packages in 3s
+
+
+69 packages are looking for funding
+
+  run `npm fund` for details
+
+8 vulnerabilities (1 low, 7 moderate)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+
+🚀 Building Coin Feedly for Railway deployment...
+
+📦 Building React frontend...
+
+vite v5.4.19 building for production...
+
+transforming...
+
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+✓ 1722 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/public/index.html                   0.63 kB │ gzip:   0.38 kB
+dist/public/assets/index-BED8D0TX.css   88.29 kB │ gzip:  14.36 kB
+
+dist/public/assets/index-mFG4srVg.js   346.22 kB │ gzip: 109.44 kB
+
+✓ built in 4.60s
+
+✅ Frontend build completed
+🔧 Building Express backend...
+
+✅ Backend build completed
+
+📝 Creating main entry point...
+
+❌ Railway build failed: Error: Build verification failed - missing output files
+    at buildRailway (file:///app/build-railway.js:69:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

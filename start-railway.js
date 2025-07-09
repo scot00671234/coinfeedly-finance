@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 
-// Simple Railway startup script
-console.log('🚀 Starting Coin Feedly on Railway...');
+console.log('🚀 Starting Railway deployment...');
+console.log('📦 Building application...');
 
-// Set production environment
-process.env.NODE_ENV = 'production';
-
-// Import and start the server
-import('./dist/index.js').then(() => {
-  console.log('✅ Railway server started successfully');
+import('./build-railway-simple.js').then(() => {
+  console.log('✅ Build completed successfully!');
+  console.log('🚀 Starting server...');
+  
+  import('./dist/index.js').catch(error => {
+    console.error('❌ Server failed to start:', error);
+    process.exit(1);
+  });
 }).catch(error => {
-  console.error('❌ Failed to start Railway server:', error);
+  console.error('❌ Build failed:', error);
   process.exit(1);
 });

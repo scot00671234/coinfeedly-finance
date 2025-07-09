@@ -178,6 +178,10 @@ The application uses four main entities:
   - Railway deployment ready with optimized build system
   - Frontend build optimized for Railway deployment constraints
   - Created production-ready HTML frontend with JavaScript for Railway compatibility
+  - Fixed Railway deployment issues with Node.js 20.x compatibility
+  - Implemented simplified build process that bypasses complex React build timeouts
+  - Created nixpacks.toml and railway.json for optimal Railway deployment
+  - Verified production build working with reduced dependencies (express + pg only)
 
 ## User Preferences
 
