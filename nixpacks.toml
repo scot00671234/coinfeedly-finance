@@ -1,11 +1,4 @@
-[phases.install]
-dependsOn = ["setup"]
-
-[phases.setup]
-nixPkgs = ["nodejs-20_x", "npm-10_x"]
-
 [phases.build]
-dependsOn = ["install"]
 cmd = "node build-railway-simple.js"
 
 [start]

@@ -1,1 +1,2 @@
-web: node server/production-entry.js
+web: npm start
+release: node build-railway-simple.js
