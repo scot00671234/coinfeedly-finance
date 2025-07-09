@@ -36,8 +36,8 @@ async function buildRailwaySimple() {
         .article-card p { color: #6c757d; margin-bottom: 1rem; }
         .article-meta { font-size: 0.9rem; color: #868e96; }
         .market-ticker { background: #343a40; color: #fff; padding: 1rem; border-radius: 4px; margin-bottom: 2rem; overflow: hidden; }
-        .market-scroll { display: flex; gap: 2rem; animation: scroll 30s linear infinite; }
-        .market-item { white-space: nowrap; }
+        .market-scroll { display: flex; gap: 2rem; animation: scroll 30s linear infinite; white-space: nowrap; }
+        .market-item { white-space: nowrap; font-size: 0.9rem; display: inline-block; }
         .positive { color: #28a745; }
         .negative { color: #dc3545; }
         .loading { text-align: center; padding: 3rem; color: #6c757d; }
@@ -70,6 +70,7 @@ async function buildRailwaySimple() {
             
             <div class="status">
                 ✅ Railway deployment successful! Backend API is fully operational with real-time data feeds.
+                <br>📊 <span id="data-status">Loading real-time data...</span>
             </div>
             
             <div class="market-ticker">
@@ -91,19 +92,38 @@ async function buildRailwaySimple() {
         
         async function loadData() {
             try {
+                console.log('Loading data...');
                 const [articlesRes, marketRes] = await Promise.all([
-                    fetch('/api/articles').catch(() => ({ ok: false })),
-                    fetch('/api/market-data/gainers').catch(() => ({ ok: false }))
+                    fetch('/api/articles').catch(err => {
+                        console.error('Articles fetch error:', err);
+                        return { ok: false };
+                    }),
+                    fetch('/api/market-data/gainers').catch(err => {
+                        console.error('Market data fetch error:', err);
+                        return { ok: false };
+                    })
                 ]);
                 
                 if (articlesRes.ok) {
                     articles = await articlesRes.json();
+                    console.log('Articles loaded:', articles.length);
                     displayArticles();
+                } else {
+                    console.warn('Articles request failed');
                 }
                 
                 if (marketRes.ok) {
                     marketData = await marketRes.json();
+                    console.log('Market data loaded:', marketData.length);
                     displayMarketData();
+                } else {
+                    console.warn('Market data request failed');
+                }
+                
+                // Update status
+                const statusEl = document.getElementById('data-status');
+                if (statusEl) {
+                    statusEl.textContent = 'Articles: ' + (articles.length || 0) + ' | Market Data: ' + (marketData.length || 0) + ' items';
                 }
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -113,35 +133,44 @@ async function buildRailwaySimple() {
         function displayArticles() {
             const container = document.getElementById('articles-container');
             if (articles && articles.length > 0) {
-                container.innerHTML = articles.slice(0, 12).map(article => 
-                    '<div class="article-card">' +
-                    '<h3>' + (article.title || 'Untitled') + '</h3>' +
-                    '<p>' + (article.summary || 'No summary available') + '</p>' +
+                container.innerHTML = articles.slice(0, 12).map(article => {
+                    const publishedDate = article.published_at ? new Date(article.published_at).toLocaleDateString() : 'Unknown date';
+                    return '<div class="article-card">' +
+                    '<h3>' + escapeHtml(article.title || 'Untitled') + '</h3>' +
+                    '<p>' + escapeHtml(article.summary || 'No summary available') + '</p>' +
                     '<div class="article-meta">' +
-                    'By ' + (article.author_name || 'Unknown') + ' • ' + 
-                    (article.category || 'General') + ' • ' +
-                    new Date(article.published_at).toLocaleDateString() +
+                    'By ' + escapeHtml(article.author_name || 'Unknown') + ' • ' + 
+                    escapeHtml(article.category || 'General') + ' • ' +
+                    publishedDate +
                     (article.featured ? ' • Featured' : '') +
                     '</div>' +
-                    '</div>'
-                ).join('');
+                    '</div>';
+                }).join('');
             } else {
                 container.innerHTML = '<div class="loading">No articles available. Database may be initializing...</div>';
             }
         }
         
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
         function displayMarketData() {
             const container = document.getElementById('market-scroll');
             if (marketData && marketData.length > 0) {
-                container.innerHTML = marketData.map(item => 
-                    '<div class="market-item">' +
-                    '<strong>' + item.symbol + '</strong> ' +
-                    '$' + parseFloat(item.price).toFixed(2) + ' ' +
-                    '<span class="' + (item.change_percent > 0 ? 'positive' : 'negative') + '">' +
-                    (item.change_percent > 0 ? '+' : '') + item.change_percent.toFixed(2) + '%' +
+                container.innerHTML = marketData.map(item => {
+                    const price = parseFloat(item.price || 0);
+                    const changePercent = parseFloat(item.change_percent || 0);
+                    return '<div class="market-item">' +
+                    '<strong>' + (item.symbol || 'N/A') + '</strong> ' +
+                    '$' + price.toFixed(2) + ' ' +
+                    '<span class="' + (changePercent > 0 ? 'positive' : 'negative') + '">' +
+                    (changePercent > 0 ? '+' : '') + changePercent.toFixed(2) + '%' +
                     '</span>' +
-                    '</div>'
-                ).join('');
+                    '</div>';
+                }).join('');
             } else {
                 container.innerHTML = '<div class="market-item">Market data loading...</div>';
             }
@@ -230,7 +259,13 @@ app.get('/api/market-data/gainers', async (req, res) => {
   
   try {
     const result = await pool.query('SELECT * FROM market_data WHERE change_percent > 0 ORDER BY change_percent DESC LIMIT 10');
-    res.json(result.rows);
+    const marketData = result.rows.map(row => ({
+      ...row,
+      price: parseFloat(row.price || 0),
+      change_percent: parseFloat(row.change_percent || 0),
+      change: parseFloat(row.change || 0)
+    }));
+    res.json(marketData);
   } catch (error) {
     console.error('Market data query error:', error);
     res.json([]);
