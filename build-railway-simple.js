@@ -9,8 +9,24 @@ async function buildRailwaySimple() {
     mkdirSync('dist', { recursive: true });
     mkdirSync('dist/public', { recursive: true });
     
-    // Step 1: Create optimized frontend
-    console.log('📦 Creating optimized frontend...');
+    // Step 1: Build React frontend with Vite
+    console.log('📦 Building React frontend with Vite...');
+    const { build } = await import('vite');
+    
+    await build({
+      configFile: './vite.config.ts',
+      build: {
+        outDir: './dist/public',
+        emptyOutDir: true,
+        rollupOptions: {
+          external: []
+        }
+      }
+    });
+    
+    console.log('✅ React frontend built successfully');
+    
+    // Step 1b: Fallback HTML for direct access
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,8 +211,13 @@ async function buildRailwaySimple() {
 </body>
 </html>`;
     
-    writeFileSync('dist/public/index.html', htmlContent);
-    console.log('✅ Frontend created');
+    // Only write fallback HTML if Vite build failed
+    if (!existsSync('dist/public/index.html')) {
+      writeFileSync('dist/public/index.html', htmlContent);
+      console.log('✅ Fallback HTML created');
+    } else {
+      console.log('✅ Using Vite-built React frontend');
+    }
     
     // Step 2: Create simplified backend
     console.log('🔧 Creating backend...');

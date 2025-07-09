@@ -1,5 +1,5 @@
 [phases.build]
-cmd = "node build-railway-simple.js"
+cmd = "npm run build"
 
 [start]
 cmd = "npm start"
