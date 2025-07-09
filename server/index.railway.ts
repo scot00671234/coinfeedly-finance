@@ -1,12 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { runMigrations, seedInitialData } from "./migrate";
+import { setupRailwayDatabase, seedRailwayData } from "./railway-setup";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -37,31 +38,34 @@ app.use((req, res, next) => {
   next();
 });
 
+// Railway deployment initialization
 (async () => {
-  // Run database migrations and seed data on startup
-  console.log('🚀 Starting Coin Feedly server...');
+  console.log('🚀 Starting Coin Feedly server for Railway deployment...');
   
-  // Railway database initialization
-  console.log('🚀 Initializing Railway database...');
-  const migrationsSuccess = await runMigrations();
+  // Setup Railway database with enhanced error handling
+  const { pool, success } = await setupRailwayDatabase();
   
-  if (!migrationsSuccess) {
-    console.error('❌ Railway database setup failed - server starting in degraded mode');
-    console.error('The app will still serve static files but database features will be unavailable');
-    // Continue with server startup for debugging
+  if (!success) {
+    console.error('❌ Railway database setup failed - server starting in limited mode');
+    console.error('Database-dependent features will be unavailable');
+    console.error('Check your DATABASE_URL configuration in Railway');
   } else {
-    console.log('✅ Railway database ready - seeding initial data...');
+    console.log('✅ Railway database initialized successfully');
+    
+    // Seed initial data
     try {
-      await seedInitialData();
-      console.log('✅ Railway deployment fully initialized');
+      await seedRailwayData(pool);
+      console.log('✅ Railway deployment fully initialized with sample data');
     } catch (seedError) {
       console.error('❌ Data seeding failed:', seedError.message);
-      console.log('✅ Server will still start with empty database');
+      console.log('✅ Server will continue with empty database');
     }
   }
   
+  // Initialize routes and WebSocket server
   const server = await registerRoutes(app);
 
+  // Global error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -70,24 +74,21 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Development vs Production setup
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Start server on Railway-compatible port
+  const port = process.env.PORT || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Railway deployment serving on port ${port}`);
+    console.log('🚀 Coin Feedly is ready for Railway deployment!');
   });
 })();
