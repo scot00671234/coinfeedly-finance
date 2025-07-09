@@ -263,25 +263,35 @@ function setupStaticFiles() {
           
           <script>
             // Load articles via API
+            console.log('Loading articles from API...');
             fetch('/api/articles')
-              .then(response => response.json())
+              .then(response => {
+                console.log('API response status:', response.status);
+                if (!response.ok) {
+                  throw new Error('Failed to fetch articles');
+                }
+                return response.json();
+              })
               .then(articles => {
+                console.log('Articles loaded:', articles.length);
                 const container = document.getElementById('articles-container');
-                if (articles.length > 0) {
+                if (articles && articles.length > 0) {
+                  // Show real articles from database
                   container.innerHTML = articles.slice(0, 10).map(article => 
                     '<div class="article-item">' +
-                    '<h3>' + article.title + '</h3>' +
-                    '<p>' + article.summary + '</p>' +
-                    '<small>By ' + article.author_name + ' • ' + article.category + '</small>' +
+                    '<h3>' + (article.title || 'No title') + '</h3>' +
+                    '<p>' + (article.summary || 'No summary available') + '</p>' +
+                    '<small>By ' + (article.author_name || 'Unknown') + ' • ' + (article.category || 'General') + '</small>' +
                     '</div>'
                   ).join('');
                 } else {
-                  container.innerHTML = '<p>No articles available yet.</p>';
+                  container.innerHTML = '<p>No articles available yet. Database might be initializing...</p>';
                 }
               })
               .catch(error => {
+                console.error('Error fetching articles:', error);
                 document.getElementById('articles-container').innerHTML = 
-                  '<p>Error loading articles: ' + error.message + '</p>';
+                  '<p>Error loading articles: ' + error.message + '</p><p>Please check the API endpoint or try refreshing the page.</p>';
               });
           </script>
         </body>
