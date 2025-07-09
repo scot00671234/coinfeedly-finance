@@ -1,5 +1,5 @@
 [phases.build]
-cmd = "npm run build"
+cmd = "vite build && esbuild server/index.production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"
 
 [start]
-cmd = "npm start"
+cmd = "NODE_ENV=production node dist/index.production.js"

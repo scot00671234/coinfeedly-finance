@@ -194,9 +194,10 @@ The application uses four main entities:
   - Implemented HTML escaping for article content to prevent XSS issues
   - Railway deployment now fully functional with working frontend and backend
   - Fixed Railway production build to use actual React frontend instead of simplified HTML
-  - Updated nixpacks.toml to use standard npm build process for proper React app deployment
+  - Updated nixpacks.toml to use standard Vite build process and production entry point
   - Confirmed Railway deployment will now show the same React UI as development environment
   - Railway build process now correctly builds and serves the full React application with all features
+  - Fixed Railway deployment to use server/index.production.ts for proper production environment
 
 ## User Preferences
 
