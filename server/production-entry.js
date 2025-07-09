@@ -1,8 +1,13 @@
 import express from "express";
 import { createServer } from "http";
-import path from "path";
-import fs from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+import { existsSync } from "fs";
 import { Pool } from 'pg';
+
+// ES module compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Railway Production Entry Point - JavaScript for simplicity
 const app = express();
@@ -187,15 +192,15 @@ function setupRoutes(pool) {
 
 // Static files
 function setupStaticFiles() {
-  const distPath = path.join(process.cwd(), "dist", "public");
+  const distPath = join(process.cwd(), "dist", "public");
   
-  if (fs.existsSync(distPath)) {
+  if (existsSync(distPath)) {
     app.use(express.static(distPath));
     console.log(`✅ Serving static files from: ${distPath}`);
     
     app.use("*", (req, res) => {
-      const indexPath = path.join(distPath, "index.html");
-      if (fs.existsSync(indexPath)) {
+      const indexPath = join(distPath, "index.html");
+      if (existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
         res.status(404).send("Application not found");

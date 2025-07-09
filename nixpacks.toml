@@ -2,7 +2,7 @@
 NODE_ENV = "production"
 
 [phases.build]
-cmds = ["npm install", "npm run build"]
+cmds = ["npm install"]
 
 [phases.start]
-cmd = "npm start"
+cmd = "node server/production-entry.js"
