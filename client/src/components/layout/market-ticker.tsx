@@ -26,9 +26,9 @@ export default function MarketTicker() {
           {marketData.map((stock, index) => (
             <div key={`${stock.symbol}-${index}`} className="flex items-center space-x-2 px-4">
               <span className="font-semibold text-sm">{stock.symbol}</span>
-              <span className="text-sm">${stock.price.toFixed(2)}</span>
-              <span className={`text-sm ${stock.changePercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {stock.changePercent >= 0 ? '+' : ''}{formatPercent(stock.changePercent)}
+              <span className="text-sm">${typeof stock.price === 'number' ? stock.price.toFixed(2) : '0.00'}</span>
+              <span className={`text-sm ${(stock.changePercent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {(stock.changePercent || 0) >= 0 ? '+' : ''}{formatPercent(stock.changePercent || 0)}
               </span>
             </div>
           ))}
@@ -36,9 +36,9 @@ export default function MarketTicker() {
           {marketData.map((stock, index) => (
             <div key={`${stock.symbol}-duplicate-${index}`} className="flex items-center space-x-2 px-4">
               <span className="font-semibold text-sm">{stock.symbol}</span>
-              <span className="text-sm">${stock.price.toFixed(2)}</span>
-              <span className={`text-sm ${stock.changePercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                {stock.changePercent >= 0 ? '+' : ''}{formatPercent(stock.changePercent)}
+              <span className="text-sm">${typeof stock.price === 'number' ? stock.price.toFixed(2) : '0.00'}</span>
+              <span className={`text-sm ${(stock.changePercent || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {(stock.changePercent || 0) >= 0 ? '+' : ''}{formatPercent(stock.changePercent || 0)}
               </span>
             </div>
           ))}

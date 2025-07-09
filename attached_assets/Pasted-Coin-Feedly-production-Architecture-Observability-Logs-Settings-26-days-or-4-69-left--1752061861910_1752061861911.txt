@@ -1,0 +1,414 @@
+Coin Feedly
+
+
+production
+Architecture
+Observability
+Logs
+Settings
+
+26 days or $4.69 left
+
+
+Share
+
+
+
+
+
+
+
+
+Activity
+
+coinfeedly-finance
+
+Deployment crashed
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment restarted
+
+12 hours ago
+
+coinfeedly-finance
+
+Deployment successful
+
+12 hours ago
+
+
+Fetch More
+
+coinfeedly-finance
+Deployments
+Variables
+Metrics
+Settings
+coinfeedly-finance-production.up.railway.app
+europe-west4-drams3a
+1 Replica
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+coinfeedly-finance
+/
+02f55b4
+Jul 9, 2025, 2:12 AM
+Crashed
+
+coinfeedly-finance-production.up.railway.app
+Get Help
+
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+
+Filter
+Filter logs using "", (), AND, OR, -
+
+
+
+You reached the start of the range → Jul 9, 2025, 2:12 AM
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+    at validateString (node:internal/validators:162:11)
+
+    at Object.resolve (node:path:1097:7)
+
+    at file:///app/dist/index.js:814:17
+
+    at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+    at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+    at async loadESM (node:internal/process/esm_loader:34:7)
+
+    at async handleMainPromise (node:internal/modules/run_main:106:12) {
+
+  code: 'ERR_INVALID_ARG_TYPE'
+
+}
+
+ 
+
+Node.js v18.20.5
+
+node:internal/errors:496
+
+    ErrorCaptureStackTrace(err);
+
+    ^
+
+ 
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "paths[0]" argument must be of type string. Received undefined
+
+    at new NodeError (node:internal/errors:405:5)
+
+
+coinfeedly-finance | Railway
