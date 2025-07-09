@@ -212,11 +212,78 @@ function setupStaticFiles() {
       res.send(`
         <!DOCTYPE html>
         <html>
-        <head><title>Coin Feedly</title></head>
+        <head>
+          <title>Coin Feedly - Financial News Platform</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+            .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+            .status { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+            .api-section { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0; }
+            .endpoint { background: #e9ecef; padding: 8px; margin: 5px 0; border-radius: 4px; font-family: monospace; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            .article-list { margin: 20px 0; }
+            .article-item { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 4px; border-left: 4px solid #007bff; }
+            .loading { text-align: center; padding: 20px; color: #666; }
+          </style>
+        </head>
         <body>
-          <h1>Coin Feedly</h1>
-          <p>Railway deployment successful!</p>
-          <p>API available at: <a href="/api/health">/api/health</a></p>
+          <div class="container">
+            <h1>🚀 Coin Feedly - Financial News Platform</h1>
+            
+            <div class="status">
+              ✅ Railway deployment successful! Backend API is fully operational.
+            </div>
+            
+            <div class="api-section">
+              <h2>📡 API Endpoints</h2>
+              <div class="endpoint">
+                <strong>Health Check:</strong> <a href="/api/health">/api/health</a>
+              </div>
+              <div class="endpoint">
+                <strong>Articles:</strong> <a href="/api/articles">/api/articles</a>
+              </div>
+              <div class="endpoint">
+                <strong>Market Gainers:</strong> <a href="/api/market-data/gainers">/api/market-data/gainers</a>
+              </div>
+            </div>
+            
+            <div class="article-list">
+              <h2>📰 Latest Articles</h2>
+              <div id="articles-container" class="loading">Loading articles...</div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666;">
+              <p>Full React frontend will be available after complete deployment.</p>
+              <p>This is a functional backend API interface for Railway deployment testing.</p>
+            </div>
+          </div>
+          
+          <script>
+            // Load articles via API
+            fetch('/api/articles')
+              .then(response => response.json())
+              .then(articles => {
+                const container = document.getElementById('articles-container');
+                if (articles.length > 0) {
+                  container.innerHTML = articles.slice(0, 10).map(article => 
+                    '<div class="article-item">' +
+                    '<h3>' + article.title + '</h3>' +
+                    '<p>' + article.summary + '</p>' +
+                    '<small>By ' + article.author_name + ' • ' + article.category + '</small>' +
+                    '</div>'
+                  ).join('');
+                } else {
+                  container.innerHTML = '<p>No articles available yet.</p>';
+                }
+              })
+              .catch(error => {
+                document.getElementById('articles-container').innerHTML = 
+                  '<p>Error loading articles: ' + error.message + '</p>';
+              });
+          </script>
         </body>
         </html>
       `);
