@@ -219,7 +219,35 @@ async function buildRailwaySimple() {
       console.log('✅ Using Vite-built React frontend');
     }
     
-    // Step 2: Create simplified backend
+    // Step 2: Copy server files first
+    console.log('📁 Copying server files...');
+    
+    // Create server directory structure in dist
+    mkdirSync('dist/server', { recursive: true });
+    mkdirSync('dist/server/services', { recursive: true });
+    mkdirSync('dist/shared', { recursive: true });
+    
+    // Copy essential server files
+    const serverFiles = [
+      'server/railway-init.ts',
+      'server/routes.ts', 
+      'server/storage.ts',
+      'server/db.ts',
+      'server/services/gemini.ts',
+      'server/services/coingecko.ts',
+      'server/services/yahoo-finance.ts',
+      'server/services/real-time-news.ts',
+      'shared/schema.ts'
+    ];
+    
+    for (const file of serverFiles) {
+      if (existsSync(file)) {
+        copyFileSync(file, file.replace(/^(server|shared)/, 'dist/$1'));
+        console.log('  Copied:', file);
+      }
+    }
+    
+    // Step 3: Create simplified backend
     console.log('🔧 Creating backend...');
     const backendCode = `import express from "express";
 import { createServer } from "http";
@@ -235,23 +263,96 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Database setup
+// Database connection
 let pool;
-if (process.env.DATABASE_URL) {
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  });
+let dbInitialized = false;
+
+async function initializeDatabase() {
+  if (!process.env.DATABASE_URL) {
+    console.warn('⚠️  DATABASE_URL not found');
+    return false;
+  }
   
-  // Initialize database
-  pool.query('SELECT NOW()').then(() => {
+  try {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
+    
+    // Test connection
+    await pool.query('SELECT NOW()');
     console.log('✅ Database connected');
-  }).catch(err => {
-    console.error('❌ Database connection failed:', err);
-  });
+    
+    // Create tables if they don't exist
+    await createTables();
+    
+    dbInitialized = true;
+    return true;
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error);
+    return false;
+  }
+}
+
+async function createTables() {
+  const tables = [
+    \`CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )\`,
+    \`CREATE TABLE IF NOT EXISTS news_events (
+      id SERIAL PRIMARY KEY,
+      headline VARCHAR(500) NOT NULL,
+      summary TEXT,
+      source VARCHAR(100),
+      symbols TEXT[],
+      published_at TIMESTAMP DEFAULT NOW(),
+      processed BOOLEAN DEFAULT FALSE,
+      article_id INTEGER
+    )\`,
+    \`CREATE TABLE IF NOT EXISTS articles (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(500) NOT NULL,
+      content TEXT NOT NULL,
+      summary TEXT,
+      category VARCHAR(50),
+      author_name VARCHAR(100),
+      published_at TIMESTAMP DEFAULT NOW(),
+      featured BOOLEAN DEFAULT FALSE,
+      tags TEXT[],
+      related_symbols TEXT[],
+      views INTEGER DEFAULT 0,
+      shares INTEGER DEFAULT 0,
+      image_url VARCHAR(500)
+    )\`,
+    \`CREATE TABLE IF NOT EXISTS market_data (
+      id SERIAL PRIMARY KEY,
+      symbol VARCHAR(20) NOT NULL,
+      name VARCHAR(100),
+      price DECIMAL(15,8),
+      change_amount DECIMAL(15,8),
+      change_percent DECIMAL(10,4),
+      market_cap BIGINT,
+      volume BIGINT,
+      data_type VARCHAR(20) DEFAULT 'stock',
+      updated_at TIMESTAMP DEFAULT NOW()
+    )\`
+  ];
+  
+  for (const tableSQL of tables) {
+    try {
+      await pool.query(tableSQL);
+    } catch (error) {
+      console.error('Error creating table:', error);
+    }
+  }
+  
+  console.log('✅ Database tables ready');
 }
 
 // API Routes
@@ -260,7 +361,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/articles', async (req, res) => {
-  if (!pool) {
+  if (!pool || !dbInitialized) {
     return res.json([]);
   }
   
@@ -274,7 +375,7 @@ app.get('/api/articles', async (req, res) => {
 });
 
 app.get('/api/market-data/gainers', async (req, res) => {
-  if (!pool) {
+  if (!pool || !dbInitialized) {
     return res.json([]);
   }
   
@@ -290,6 +391,15 @@ app.get('/api/market-data/gainers', async (req, res) => {
   } catch (error) {
     console.error('Market data query error:', error);
     res.json([]);
+  }
+});
+
+// Start database initialization
+initializeDatabase().then(success => {
+  if (success) {
+    console.log('✅ Railway database ready');
+  } else {
+    console.warn('⚠️  Starting without database functionality');
   }
 });
 
@@ -344,7 +454,8 @@ process.on('SIGTERM', () => {
       },
       "dependencies": {
         "express": "^4.21.2",
-        "pg": "^8.16.3"
+        "pg": "^8.16.3",
+        "@google/genai": "^1.8.0"
       },
       "engines": {
         "node": ">=18.0.0"
