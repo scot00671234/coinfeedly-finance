@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import type { NewsEvent } from "@shared/schema";
 
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GOOGLE_API_KEY || "AIzaSyAi6VLtLvL-Dyc5ktv9mnBjQwGUx4MK4Qk"
+  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "AIzaSyAi6VLtLvL-Dyc5ktv9mnBjQwGUx4MK4Qk"
 });
 
 export async function generateArticleWithGrounding(topic: string, category: string): Promise<{

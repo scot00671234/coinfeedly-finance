@@ -251,12 +251,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initial article generation (async, don't block server startup)
   processNewsEvents().catch(console.error);
 
-  // Generate market analysis articles every 45 minutes
-  setInterval(processNewsEvents, 45 * 60 * 1000);
+  // Generate market analysis articles every 45 minutes  
+  // Wait 60 seconds before starting to ensure previous processes are ready
+  setTimeout(() => {
+    setInterval(processNewsEvents, 45 * 60 * 1000);
+  }, 60000);
 
   // Generate real-time news with web grounding every 20 minutes
-  generateRealTimeNews().catch(console.error);
-  setInterval(generateRealTimeNews, 20 * 60 * 1000);
+  // Wait 30 seconds before starting to ensure database is ready
+  setTimeout(() => {
+    generateRealTimeNews().catch(console.error);
+    setInterval(generateRealTimeNews, 20 * 60 * 1000);
+  }, 30000);
 
   return httpServer;
 }

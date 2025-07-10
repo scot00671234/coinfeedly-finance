@@ -52,6 +52,11 @@ app.use((req, res, next) => {
       console.log('✅ Database initialization completed');
     }
 
+    // Add health check endpoint for Railway
+    app.get('/api/health', (req, res) => {
+      res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    });
+
     // Import and register routes dynamically
     const { registerRoutes } = await import('./routes');
     const server = await registerRoutes(app);
@@ -101,6 +106,8 @@ app.use((req, res, next) => {
     server.listen(port, '0.0.0.0', () => {
       console.log(`🚀 Railway server listening on port ${port}`);
       console.log('✅ Coin Feedly is ready for Railway deployment!');
+      console.log(`📊 Environment check: DATABASE_URL ${process.env.DATABASE_URL ? 'SET' : 'NOT_SET'}`);
+      console.log(`🤖 Environment check: GEMINI_API_KEY ${process.env.GEMINI_API_KEY ? 'SET' : 'NOT_SET'}`);
     });
 
     // Graceful shutdown
