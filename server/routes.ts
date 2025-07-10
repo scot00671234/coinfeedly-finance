@@ -257,11 +257,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     setInterval(processNewsEvents, 45 * 60 * 1000);
   }, 60000);
 
-  // Generate real-time news with web grounding every 20 minutes
+  // Generate real-time news with web grounding every 30 minutes (increased from 20 to reduce rate limit hits)
   // Wait 30 seconds before starting to ensure database is ready
   setTimeout(() => {
     generateRealTimeNews().catch(console.error);
-    setInterval(generateRealTimeNews, 20 * 60 * 1000);
+    setInterval(generateRealTimeNews, 30 * 60 * 1000);
   }, 30000);
 
   return httpServer;

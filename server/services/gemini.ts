@@ -62,6 +62,12 @@ export async function generateArticleWithGrounding(topic: string, category: stri
       throw new Error("Empty response from Gemini");
     }
   } catch (error) {
+    if (error.status === 429) {
+      console.warn('⚠️  Gemini API rate limit exceeded, waiting before retry...');
+      // Wait 45 seconds before retrying (based on API response)
+      await new Promise(resolve => setTimeout(resolve, 45000));
+      throw new Error('Rate limit exceeded - will retry later');
+    }
     console.error('Error generating article with grounding:', error);
     throw error;
   }
@@ -142,6 +148,12 @@ export async function generateArticle(newsEvent: NewsEvent): Promise<{
       throw new Error("Empty response from Gemini API");
     }
   } catch (error) {
+    if (error.status === 429) {
+      console.warn('⚠️  Gemini API rate limit exceeded, waiting before retry...');
+      // Wait 45 seconds before retrying (based on API response)
+      await new Promise(resolve => setTimeout(resolve, 45000));
+      throw new Error('Rate limit exceeded - will retry later');
+    }
     console.error("Error generating article:", error);
     throw new Error(`Failed to generate article: ${error}`);
   }

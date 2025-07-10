@@ -50,12 +50,15 @@ class RealTimeNewsService {
   async generateRealTimeArticles(): Promise<void> {
     console.log('Generating real-time articles with web grounding...');
     
-    // Generate 2-3 articles per hour to keep content fresh
-    const selectedTopics = this.getRandomTopics(3);
+    // Generate only 1 article per cycle to respect rate limits
+    const selectedTopics = this.getRandomTopics(1);
     
     for (const topicData of selectedTopics) {
       try {
         console.log(`Generating article for: ${topicData.topic}`);
+        
+        // Add initial delay to prevent rate limit
+        await new Promise(resolve => setTimeout(resolve, 3000));
         
         const articleData = await generateArticleWithGrounding(topicData.topic, topicData.category);
         
@@ -88,10 +91,11 @@ class RealTimeNewsService {
         const createdArticle = await storage.createArticle(article);
         console.log(`✓ Created article: ${createdArticle.title}`);
         
-        // Add a small delay between articles
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
       } catch (error) {
+        if (error.message && error.message.includes('Rate limit exceeded')) {
+          console.warn('⚠️  Rate limit hit, stopping article generation for this cycle');
+          break;
+        }
         console.error(`Error generating article for ${topicData.topic}:`, error);
       }
     }

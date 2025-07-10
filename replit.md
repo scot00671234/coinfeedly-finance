@@ -218,6 +218,14 @@ The application uses four main entities:
   - Added custom favicon for improved branding
   - Enhanced HTML metadata for better SEO
   - All systems verified and running smoothly on port 5000
+- July 10, 2025. Railway deployment rate limiting fix implemented
+  - Fixed Gemini API rate limiting issues (429 errors) by implementing proper rate limiting
+  - Reduced article generation frequency from 20 to 30 minutes to respect API quotas
+  - Limited concurrent article generation to 1 per cycle instead of 3
+  - Added proper error handling for rate limit exceeded scenarios
+  - Updated Railway production server with correct API key resolution (GEMINI_API_KEY)
+  - Enhanced production server with health check endpoint for Railway monitoring
+  - Railway deployment now respects free tier API limits while maintaining continuous content generation
 
 ## User Preferences
 
