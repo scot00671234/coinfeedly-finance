@@ -5,7 +5,8 @@ import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
 import { realNewsGenerator } from "./services/real-news-generator";
 import { realTimeNewsService } from "./services/real-time-news";
-import { rssFeedService } from "./services/rss-feeds";
+import { yahooFinanceService } from "./services/yahoo-finance";
+import { coinGeckoService } from "./services/coingecko";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -211,10 +212,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   async function processNewsEvents() {
     try {
-      // Generate articles from RSS feeds
-      await rssFeedService.fetchAllFeeds();
+      // Generate market-based articles using real-time news service
+      console.log('Generating market analysis articles...');
+      await realTimeNewsService.generateRealTimeArticles();
+      console.log('Market analysis articles completed');
     } catch (error) {
-      console.error('Error processing RSS feeds:', error);
+      console.error('Error generating market articles:', error);
     }
   }
 
@@ -229,25 +232,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Test route to trigger RSS feed processing
-  app.post("/api/test-rss", async (req, res) => {
+  // Test route to trigger article generation
+  app.post("/api/test-articles", async (req, res) => {
     try {
-      await rssFeedService.fetchAllFeeds();
-      res.json({ message: "RSS feeds processed successfully" });
+      await realTimeNewsService.generateRealTimeArticles();
+      res.json({ message: "Articles generated successfully" });
     } catch (error) {
-      res.status(500).json({ error: "Failed to process RSS feeds" });
+      res.status(500).json({ error: "Failed to generate articles" });
     }
   });
 
-  // Initial RSS feed processing (async, don't block server startup)
+  // Initial market data fetch
+  fetchAndUpdateMarketData().catch(console.error);
+  
+  // Update market data every 15 minutes
+  setInterval(fetchAndUpdateMarketData, 15 * 60 * 1000);
+  
+  // Initial article generation (async, don't block server startup)
   processNewsEvents().catch(console.error);
 
-  // Process RSS feeds every 1 hour to generate real articles
-  setInterval(processNewsEvents, 60 * 60 * 1000);
+  // Generate market analysis articles every 45 minutes
+  setInterval(processNewsEvents, 45 * 60 * 1000);
 
-  // Generate real-time news with web grounding every 30 minutes
-  generateRealTimeNews();
-  setInterval(generateRealTimeNews, 30 * 60 * 1000);
+  // Generate real-time news with web grounding every 20 minutes
+  generateRealTimeNews().catch(console.error);
+  setInterval(generateRealTimeNews, 20 * 60 * 1000);
 
   return httpServer;
 }

@@ -54,8 +54,7 @@ app.use((req, res, next) => {
 
     // Import and register routes dynamically
     const { registerRoutes } = await import('./routes');
-    const server = createServer(app);
-    await registerRoutes(app);
+    const server = await registerRoutes(app);
 
     // Static file serving for production
     const distPath = join(process.cwd(), "dist", "public");
