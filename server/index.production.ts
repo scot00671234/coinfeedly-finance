@@ -61,6 +61,38 @@ app.use((req, res, next) => {
     const { registerRoutes } = await import('./routes');
     const server = await registerRoutes(app);
 
+    // Start background article generation for Railway
+    if (process.env.GEMINI_API_KEY) {
+      console.log('🤖 Starting background article generation for Railway...');
+      
+      // Import the article generation service
+      const { realTimeNewsService } = await import('./services/real-time-news');
+      
+      // Generate articles immediately and then every 45 minutes
+      setTimeout(async () => {
+        try {
+          console.log('🤖 Generating initial articles for Railway...');
+          await realTimeNewsService.generateRealTimeArticles();
+          console.log('✅ Initial articles generated');
+        } catch (error) {
+          console.error('❌ Error generating initial articles:', error);
+        }
+      }, 10000); // Initial delay of 10 seconds
+      
+      // Set up periodic generation
+      setInterval(async () => {
+        try {
+          console.log('🤖 Generating periodic articles for Railway...');
+          await realTimeNewsService.generateRealTimeArticles();
+          console.log('✅ Periodic articles generated');
+        } catch (error) {
+          console.error('❌ Error generating periodic articles:', error);
+        }
+      }, 45 * 60 * 1000); // Every 45 minutes
+    } else {
+      console.log('⚠️  GEMINI_API_KEY not set, background article generation disabled');
+    }
+
     // Static file serving for production
     const distPath = join(process.cwd(), "dist", "public");
     
