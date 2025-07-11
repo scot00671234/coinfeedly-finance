@@ -1,0 +1,121 @@
+
+
+    activeQuery: null,
+
+          },
+
+    readyForQuery: true,
+
+    hasExecuted: true,
+
+          _parentWrap: Socket {
+
+    _poolUseCount: 5,
+
+            connecting: false,
+
+    [Symbol(kCapture)]: false
+
+  }
+
+            _hadError: false,
+
+}
+
+ 
+
+            _parent: null,
+
+Node.js v18.20.5
+
+            _host: 'postgres.railway.internal',
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+            _closeAfterHandlingError: false,
+
+> coin-feedly@1.0.0 start
+
+            _readableState: [ReadableState],
+
+> node index.js
+
+ 
+
+            _events: [Object: null prototype],
+
+✅ Serving static files from: /app/dist/public
+
+🚀 Server running on port 8080
+
+            _eventsCount: 4,
+
+            _maxListeners: undefined,
+
+            _writableState: [WritableState],
+
+            allowHalfOpen: false,
+
+            _sockname: null,
+
+            _pendingData: null,
+
+            _pendingEncoding: '',
+
+            server: null,
+
+            _server: null,
+
+            [Symbol(async_id_symbol)]: 16,
+
+            [Symbol(kHandle)]: null,
+
+            [Symbol(lastWriteQueueSize)]: 0,
+
+            [Symbol(timeout)]: null,
+
+            [Symbol(kBuffer)]: null,
+
+            [Symbol(kBufferCb)]: null,
+
+            [Symbol(kBufferGen)]: null,
+
+            [Symbol(kCapture)]: false,
+
+            [Symbol(kSetNoDelay)]: true,
+
+            [Symbol(kSetKeepAlive)]: false,
+
+            [Symbol(kSetKeepAliveInitialDelay)]: 0,
+
+            [Symbol(kBytesRead)]: 3926,
+
+            [Symbol(kBytesWritten)]: 2659
+
+❌ Database initialization failed: Error: Connection terminated due to connection timeout
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async initializeDatabase (file:///app/dist/index.js:35:5) {
+
+  [cause]: Error: Connection terminated unexpectedly
+
+      at Connection.<anonymous> (/app/node_modules/pg/lib/client.js:136:73)
+
+      at Object.onceWrapper (node:events:631:28)
+
+      at Connection.emit (node:events:517:28)
+
+      at Socket.<anonymous> (/app/node_modules/pg/lib/connection.js:62:12)
+
+      at Socket.emit (node:events:517:28)
+
+      at TCP.<anonymous> (node:net:350:12)
+
+}
+
+⚠️  Starting without database functionality

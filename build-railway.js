@@ -277,14 +277,31 @@ async function initializeDatabase() {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      max: 5,                     // Reduced pool size for Railway
+      min: 1,                     // Minimum connections
+      idleTimeoutMillis: 60000,   // 1 minute idle timeout
+      connectionTimeoutMillis: 15000,  // 15 second connection timeout
+      acquireTimeoutMillis: 15000,     // 15 second acquire timeout
+      statement_timeout: 30000,        // 30 second statement timeout
+      query_timeout: 30000,           // 30 second query timeout
     });
     
-    // Test connection
-    await pool.query('SELECT NOW()');
-    console.log('✅ Database connected');
+    // Test connection with retry logic
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        const client = await pool.connect();
+        await client.query('SELECT NOW()');
+        client.release();
+        console.log('✅ Database connected');
+        break;
+      } catch (error) {
+        retries--;
+        if (retries === 0) throw error;
+        console.log(\`⚠️  Database connection failed, retrying... (\${retries} attempts left)\`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    }
     
     // Create tables if they don't exist
     await createTables();
@@ -423,8 +440,13 @@ app.get('/api/debug', (req, res) => {
 
 // Article generation function
 async function generateArticle() {
-  if (!process.env.GEMINI_API_KEY || !pool || !dbInitialized) {
-    console.log('⚠️  Article generation skipped (missing API key or database)');
+  if (!process.env.GEMINI_API_KEY) {
+    console.log('⚠️  Article generation skipped (missing Gemini API key)');
+    return;
+  }
+  
+  if (!pool || !dbInitialized) {
+    console.log('⚠️  Article generation skipped (database not ready)');
     return;
   }
 
@@ -485,21 +507,35 @@ async function generateArticle() {
     
     const articleData = JSON.parse(jsonMatch[0]);
     
-    await pool.query(\`
-      INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    \`, [
-      articleData.title,
-      articleData.content,
-      articleData.summary,
-      'Markets',
-      'AI Financial Analyst',
-      Math.random() < 0.3,
-      ['ai-generated', 'markets', 'analysis'],
-      ['SPY', 'BTC', 'ETH']
-    ]);
-    
-    console.log(\`✅ Generated article: \${articleData.title.substring(0, 50)}...\`);
+    // Try to insert into database with retry logic
+    let insertRetries = 3;
+    while (insertRetries > 0) {
+      try {
+        await pool.query(\`
+          INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        \`, [
+          articleData.title,
+          articleData.content,
+          articleData.summary,
+          'Markets',
+          'AI Financial Analyst',
+          Math.random() < 0.3,
+          ['ai-generated', 'markets', 'analysis'],
+          ['SPY', 'BTC', 'ETH']
+        ]);
+        
+        console.log(\`✅ Generated article: \${articleData.title.substring(0, 50)}...\`);
+        break;
+      } catch (dbError) {
+        insertRetries--;
+        if (insertRetries === 0) {
+          throw new Error(\`Database insert failed after retries: \${dbError.message}\`);
+        }
+        console.log(\`⚠️  Database insert failed, retrying... (\${insertRetries} attempts left)\`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
   } catch (error) {
     console.error('❌ Error generating article:', error.message);
   }
