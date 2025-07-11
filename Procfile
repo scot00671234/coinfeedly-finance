@@ -1,2 +1,2 @@
 web: npm start
-release: node build-railway-simple.js
+release: node build-railway.js
