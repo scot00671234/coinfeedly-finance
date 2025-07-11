@@ -394,10 +394,101 @@ app.get('/api/market-data/gainers', async (req, res) => {
   }
 });
 
+// Article generation function
+async function generateArticle() {
+  if (!process.env.GEMINI_API_KEY || !pool || !dbInitialized) {
+    console.log('⚠️  Article generation skipped (missing API key or database)');
+    return;
+  }
+
+  try {
+    console.log('🤖 Generating article...');
+    
+    const topics = [
+      'Federal Reserve interest rate decisions and market impact',
+      'Technology stock earnings season analysis',
+      'Cryptocurrency market trends and regulatory developments',
+      'Global economic indicators and recession concerns',
+      'Energy sector performance amid geopolitical tensions',
+      'Banking sector stability and credit market conditions'
+    ];
+    
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    
+    const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=\${process.env.GEMINI_API_KEY}\`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: \`Write a comprehensive financial news article about: \${randomTopic}. 
+            
+            Format the response as JSON with these exact fields:
+            {
+              "title": "Article title (engaging and professional)",
+              "content": "Full article content (minimum 800 words, well-structured with multiple paragraphs)",
+              "summary": "Brief summary (100-150 words)"
+            }
+            
+            Make it sound like it was written by a professional financial journalist. Include market analysis, expert opinions, and current market context. Do not use placeholder text.\`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(\`Gemini API error: \${response.status}\`);
+    }
+
+    const data = await response.json();
+    const generatedText = data.candidates[0].content.parts[0].text;
+    
+    const jsonMatch = generatedText.match(/\\{[\\s\\S]*\\}/);
+    if (!jsonMatch) {
+      throw new Error('Could not parse JSON from Gemini response');
+    }
+    
+    const articleData = JSON.parse(jsonMatch[0]);
+    
+    await pool.query(\`
+      INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    \`, [
+      articleData.title,
+      articleData.content,
+      articleData.summary,
+      'Markets',
+      'AI Financial Analyst',
+      Math.random() < 0.3,
+      ['ai-generated', 'markets', 'analysis'],
+      ['SPY', 'BTC', 'ETH']
+    ]);
+    
+    console.log(\`✅ Generated article: \${articleData.title.substring(0, 50)}...\`);
+  } catch (error) {
+    console.error('❌ Error generating article:', error.message);
+  }
+}
+
 // Start database initialization
 initializeDatabase().then(success => {
   if (success) {
     console.log('✅ Railway database ready');
+    
+    // Start article generation after database is ready
+    setTimeout(() => {
+      generateArticle();
+      // Generate new articles every 30 minutes
+      setInterval(generateArticle, 30 * 60 * 1000);
+    }, 5000);
   } else {
     console.warn('⚠️  Starting without database functionality');
   }
