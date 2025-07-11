@@ -2,7 +2,7 @@
 cmd = "npm run build"
 
 [phases.release]
-cmd = "node build-railway-simple.js"
+cmd = "node build-railway.js"
 
 [start]
 cmd = "cd dist && npm install && npm start"
