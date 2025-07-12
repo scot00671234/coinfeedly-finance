@@ -52,104 +52,14 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Articles
+  // Articles - only return real RSS data
   async getArticles(limit = 50, offset = 0): Promise<Article[]> {
-    try {
-      return await db
-        .select()
-        .from(articles)
-        .orderBy(desc(articles.publishedAt))
-        .limit(limit)
-        .offset(offset);
-    } catch (error) {
-      console.log('📰 Using sample articles (database unavailable)');
-      return this.getSampleArticles();
-    }
-  }
-
-  private getSampleArticles(): Article[] {
-    return [
-      {
-        id: 1,
-        title: 'Bitcoin Reaches New Heights as Institutional Adoption Accelerates',
-        slug: 'bitcoin-reaches-new-heights-institutional-adoption',
-        content: 'Bitcoin has surged to impressive levels as major financial institutions continue to embrace cryptocurrency. The digital asset\'s recent performance reflects growing confidence from institutional investors and improved regulatory clarity across global markets. This momentum is expected to continue as more traditional finance players enter the crypto space.',
-        summary: 'Bitcoin surges as institutional investors drive adoption and regulatory clarity improves.',
-        category: 'Crypto',
-        authorName: 'CoinTelegraph',
-        publishedAt: new Date(Date.now() - 60000),
-        imageUrl: null,
-        featured: true,
-        tags: ['bitcoin', 'crypto', 'institutional'],
-        relatedSymbols: ['BTC', 'ETH'],
-        viewCount: 1247,
-        shareCount: 89
-      },
-      {
-        id: 2,
-        title: 'Federal Reserve Hints at Policy Shifts Amid Economic Data',
-        slug: 'federal-reserve-hints-policy-shifts-economic-data',
-        content: 'The Federal Reserve has signaled potential adjustments to monetary policy following the latest economic indicators. Recent data showing moderated inflation and stable employment has provided the central bank with more flexibility in its decision-making process.',
-        summary: 'Fed considers policy adjustments as economic indicators show positive trends.',
-        category: 'Markets',
-        authorName: 'Bloomberg',
-        publishedAt: new Date(Date.now() - 120000),
-        imageUrl: null,
-        featured: false,
-        tags: ['fed', 'policy', 'markets'],
-        relatedSymbols: ['SPY', 'QQQ'],
-        viewCount: 892,
-        shareCount: 45
-      },
-      {
-        id: 3,
-        title: 'Tech Sector Demonstrates Resilience in Latest Earnings Reports',
-        slug: 'tech-sector-demonstrates-resilience-latest-earnings',
-        content: 'Technology companies have delivered stronger-than-expected earnings results, showcasing the sector\'s ability to navigate challenging economic conditions. Cloud computing and AI initiatives continue to drive growth.',
-        summary: 'Tech companies exceed earnings expectations driven by cloud and AI growth.',
-        category: 'Tech',
-        authorName: 'TechCrunch',
-        publishedAt: new Date(Date.now() - 180000),
-        imageUrl: null,
-        featured: true,
-        tags: ['tech', 'earnings', 'ai'],
-        relatedSymbols: ['AAPL', 'MSFT'],
-        viewCount: 654,
-        shareCount: 32
-      },
-      {
-        id: 4,
-        title: 'Ethereum Network Upgrade Enhances Transaction Efficiency',
-        slug: 'ethereum-network-upgrade-enhances-transaction-efficiency',
-        content: 'The latest Ethereum network upgrade has successfully improved transaction processing speeds and reduced costs for users. This enhancement represents a significant step forward in blockchain scalability.',
-        summary: 'Ethereum upgrade improves transaction speeds and reduces costs for users.',
-        category: 'Crypto',
-        authorName: 'CoinDesk',
-        publishedAt: new Date(Date.now() - 240000),
-        imageUrl: null,
-        featured: false,
-        tags: ['ethereum', 'upgrade', 'scalability'],
-        relatedSymbols: ['ETH', 'BTC'],
-        viewCount: 445,
-        shareCount: 28
-      },
-      {
-        id: 5,
-        title: 'Global Supply Chain Improvements Support Market Optimism',
-        slug: 'global-supply-chain-improvements-support-market-optimism',
-        content: 'International supply chain networks have shown marked improvement, with shipping delays decreasing and costs stabilizing. This positive development is providing relief to businesses across various sectors.',
-        summary: 'Supply chain improvements boost business confidence and market sentiment.',
-        category: 'Markets',
-        authorName: 'Reuters',
-        publishedAt: new Date(Date.now() - 300000),
-        imageUrl: null,
-        featured: false,
-        tags: ['supply-chain', 'global', 'business'],
-        relatedSymbols: ['SPY', 'DJI'],
-        viewCount: 321,
-        shareCount: 15
-      }
-    ];
+    return await db
+      .select()
+      .from(articles)
+      .orderBy(desc(articles.publishedAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async getFeaturedArticles(limit = 10): Promise<Article[]> {

@@ -73,16 +73,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
     }
   };
 
-  const handleMarketAnalysis = () => {
-    // Extract symbols and show market data
-    const symbols = article.relatedSymbols || [];
-    if (symbols.length > 0) {
-      // Show market analysis for related symbols
-      window.open(`/market-analysis?symbols=${symbols.join(',')}`, '_blank');
-    } else {
-      alert('No related market symbols found for this article');
-    }
-  };
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm">
@@ -171,12 +162,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
                 >
                   🔗 Share
                 </button>
-                <button 
-                  onClick={handleMarketAnalysis}
-                  className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
-                >
-                  📊 Market Analysis
-                </button>
+
               </div>
               <div className="text-gray-400 text-sm">
                 Stay on Coin Feedly for the latest updates

@@ -80,16 +80,7 @@ export async function initializeDatabase() {
       WHERE slug IS NULL;
     `);
 
-    // Add sample data if empty
-    const articleCount = await pool.query('SELECT COUNT(*) FROM articles');
-    if (parseInt(articleCount.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO articles (title, slug, content, summary, category, author_name, featured)
-        VALUES 
-          ('Financial Markets Overview', 'financial-markets-overview-1', 'Current market conditions show steady performance across major sectors with technology leading gains.', 'Markets show steady performance with tech leading.', 'Markets', 'Financial Team', true),
-          ('Cryptocurrency Market Update', 'cryptocurrency-market-update-2', 'Digital assets continue to show volatility with Bitcoin and Ethereum maintaining their positions as market leaders.', 'Crypto markets show continued volatility.', 'Crypto', 'Crypto Analyst', false);
-      `);
-    }
+    // Database ready - RSS service will populate with real articles
 
     console.log('✅ Database initialized successfully');
     return true;
