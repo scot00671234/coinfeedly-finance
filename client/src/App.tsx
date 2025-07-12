@@ -130,7 +130,7 @@ function LiveFeed() {
         {articles.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-green-400 mb-2">🔄 SYSTEM INITIALIZING</div>
-            <div className="text-sm">Financial intelligence streams coming online...</div>
+            <div className="text-sm">Financial data streams coming online...</div>
           </div>
         ) : (
           articles.map((item: any) => (
@@ -214,7 +214,7 @@ function AppContent() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white terminal-glow">COIN FEEDLY</h1>
-            <p className="text-gray-400 text-sm">Real-time financial intelligence • Stay informed, stay ahead</p>
+            <p className="text-gray-400 text-sm">Real-time financial data • Stay informed, stay ahead</p>
           </div>
           <div className="text-right">
             <div className="text-green-400 text-sm font-mono scanning-line">SYSTEM ACTIVE</div>

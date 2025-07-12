@@ -65,9 +65,13 @@ export class RSSService {
         const pubDateMatch = itemMatch.match(/<pubDate[^>]*>(.*?)<\/pubDate>/s);
 
         if (titleMatch && descMatch) {
+          // Try to get full content from content:encoded or use description
+          const contentMatch = itemMatch.match(/<content:encoded[^>]*>(.*?)<\/content:encoded>/s);
+          const fullContent = contentMatch ? this.cleanText(contentMatch[1]) : this.cleanText(descMatch[1]);
+          
           items.push({
             title: this.cleanText(titleMatch[1]),
-            description: this.cleanText(descMatch[1]),
+            description: fullContent,
             link: linkMatch ? linkMatch[1].trim() : '',
             pubDate: pubDateMatch ? pubDateMatch[1].trim() : new Date().toISOString()
           });
@@ -122,8 +126,10 @@ export class RSSService {
               const article: InsertArticle = {
                 title: item.title,
                 slug: this.createSlug(item.title),
-                content: item.description,
-                summary: item.description.substring(0, 200) + '...',
+                content: item.description, // Full article content from RSS
+                summary: item.description.length > 200 ? 
+                  item.description.substring(0, 200) + '...' : 
+                  item.description,
                 category: source.category,
                 authorName: source.name,
                 featured: Math.random() > 0.8,

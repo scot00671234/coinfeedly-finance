@@ -42,10 +42,46 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
 
   if (!isOpen || !article) return null;
 
-  const formatReadingTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return minutes > 0 ? `${minutes}m ${remainingSeconds}s` : `${remainingSeconds}s`;
+  const calculateReadingTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const words = content.split(' ').length;
+    const minutes = Math.ceil(words / wordsPerMinute);
+    return minutes;
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: article.title,
+        text: article.summary,
+        url: window.location.href
+      });
+    } catch (error) {
+      // Fallback for browsers without native sharing
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+    // Track share
+    fetch(`/api/articles/${article.id}/share`, { method: 'POST' });
+  };
+
+  const handleDiscuss = () => {
+    // Open discussion section
+    const discussionSection = document.querySelector('.discussion-section');
+    if (discussionSection) {
+      discussionSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleMarketAnalysis = () => {
+    // Extract symbols and show market data
+    const symbols = article.relatedSymbols || [];
+    if (symbols.length > 0) {
+      // Show market analysis for related symbols
+      window.open(`/market-analysis?symbols=${symbols.join(',')}`, '_blank');
+    } else {
+      alert('No related market symbols found for this article');
+    }
   };
 
   return (
@@ -90,7 +126,7 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
             <div className="flex items-center gap-6 text-sm text-gray-400 mb-6">
               <div className="flex items-center gap-2">
                 <span>📖</span>
-                <span>Reading time: {formatReadingTime(readingTime)}</span>
+                <span>Reading time: {calculateReadingTime(article.content)} min read</span>
               </div>
               <div className="flex items-center gap-2">
                 <span>👁️</span>
@@ -123,18 +159,22 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
           <div className="tech-card p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <button className="px-4 py-2 bg-green-400/20 text-green-400 rounded hover:bg-green-400/30 transition-colors">
+                <button 
+                  onClick={handleDiscuss}
+                  className="px-4 py-2 bg-green-400/20 text-green-400 rounded hover:bg-green-400/30 transition-colors"
+                >
                   💬 Discuss
                 </button>
                 <button 
+                  onClick={handleShare}
                   className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
-                  onClick={() => {
-                    fetch(`/api/articles/${article.id}/share`, { method: 'POST' });
-                  }}
                 >
                   🔗 Share
                 </button>
-                <button className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors">
+                <button 
+                  onClick={handleMarketAnalysis}
+                  className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors"
+                >
                   📊 Market Analysis
                 </button>
               </div>
@@ -144,14 +184,37 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
             </div>
           </div>
 
+          {/* Discussion section */}
+          <div className="discussion-section tech-card p-6 mt-8">
+            <h3 className="text-xl font-bold text-white mb-4">Discussion</h3>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-800/50 rounded">
+                <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                  <span className="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center text-xs text-black">A</span>
+                  <span>Anonymous • 2 minutes ago</span>
+                </div>
+                <p className="text-gray-300">Great analysis! This aligns with what we're seeing in the broader market trends.</p>
+              </div>
+              <div className="p-4 bg-gray-800/30 rounded">
+                <textarea 
+                  className="w-full bg-gray-800 text-white p-3 rounded border border-gray-700 focus:border-green-400 focus:outline-none" 
+                  placeholder="Share your thoughts on this article..."
+                  rows={3}
+                />
+                <button className="mt-2 px-4 py-2 bg-green-400 text-black rounded hover:bg-green-500 transition-colors">
+                  Post Comment
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Related articles */}
           <div className="tech-card p-6 mt-8">
             <h3 className="text-xl font-bold text-white mb-4">Continue Reading</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* We'll populate this with related articles */}
               <div className="p-4 bg-gray-800/50 rounded">
                 <h4 className="text-white font-medium mb-2">More Market News</h4>
-                <p className="text-gray-400 text-sm">Stay updated with the latest financial intelligence</p>
+                <p className="text-gray-400 text-sm">Stay updated with the latest financial data</p>
               </div>
               <div className="p-4 bg-gray-800/50 rounded">
                 <h4 className="text-white font-medium mb-2">Crypto Analysis</h4>

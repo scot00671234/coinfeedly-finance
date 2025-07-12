@@ -276,6 +276,16 @@ The application uses four main entities:
   - Added click-to-expand functionality to keep users engaged without external links
   - Integrated view tracking and user engagement metrics
   - Successfully pulling live financial news from major sources with real-time updates
+- July 12, 2025. Enhanced article modal with full content display and functional buttons
+  - Created dedicated ArticleModal component for immersive full-article reading experience
+  - Added estimated reading time calculation based on word count (200 words per minute)
+  - Implemented functional Share button with native sharing API and clipboard fallback
+  - Added functional Discuss button with scrolling to discussion section and comment posting
+  - Created functional Market Analysis button for related market symbols
+  - Enhanced RSS service to fetch full content from RSS feeds instead of truncated summaries
+  - Added discussion section with comment posting functionality
+  - Removed all "intelligence" references, replaced with "data" terminology
+  - Ensured full article content is displayed in modal for maximum user retention
 
 ## User Preferences
 
