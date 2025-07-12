@@ -18,11 +18,13 @@ export default function ArticlePage() {
     const articleDate = new Date(date);
     const diffInMinutes = Math.floor((now.getTime() - articleDate.getTime()) / (1000 * 60));
     
+    if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    if (diffInDays < 30) return `${diffInDays}d ago`;
+    return articleDate.toLocaleDateString();
   };
 
   if (isLoading) {
@@ -98,7 +100,7 @@ export default function ArticlePage() {
             
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-200">
               <div className="flex items-center text-sm text-gray-600">
-                <span className="font-medium">{article.authorName}</span>
+                <span className="font-medium">By Coin Feedly</span>
                 <span className="mx-3">•</span>
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
