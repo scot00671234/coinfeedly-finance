@@ -46,97 +46,120 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* New York Times Style Header */}
+      <div className="border-b border-gray-200 bg-white sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-gray-900">Coin Feedly</h1>
+              <nav className="hidden md:flex space-x-6">
+                <Link href="/crypto" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Crypto</Link>
+                <Link href="/markets" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Markets</Link>
+                <Link href="/companies" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Companies</Link>
+                <Link href="/tech" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Technology</Link>
+              </nav>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Featured Article */}
+        {/* Featured Article - New York Times Style */}
         {featuredArticle && (
-          <div className="border-b border-gray-200 pb-8 mb-8">
-            <Link href={`/articles/${featuredArticle.id}`}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 cursor-pointer hover:opacity-90 transition-opacity">
-                {featuredArticle.imageUrl && (
-                  <div className="lg:order-2">
-                    <img 
-                      src={featuredArticle.imageUrl} 
-                      alt={featuredArticle.title}
-                      className="w-full h-80 object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-                <div className="lg:order-1 flex flex-col justify-center">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                      FEATURED
-                    </span>
-                    <span className="text-blue-600 text-sm font-semibold uppercase tracking-wide">
-                      {featuredArticle.category}
-                    </span>
-                  </div>
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                    {featuredArticle.title}
-                  </h1>
-                  <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                    {featuredArticle.summary}
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500 space-x-4">
-                    <span className="font-medium">{featuredArticle.authorName}</span>
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {formatTimeAgo(featuredArticle.publishedAt)}
-                    </div>
-                    <div className="flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                      {featuredArticle.viewCount || 0} views
-                    </div>
-                  </div>
+          <div className="border-b border-gray-200 pb-12 mb-12">
+            <div className="mb-8">
+              <div className="flex items-center space-x-3 mb-4">
+                <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  FEATURED
+                </span>
+                <span className="text-blue-600 text-sm font-semibold uppercase tracking-wide">
+                  {featuredArticle.category}
+                </span>
+              </div>
+              <Link href={`/articles/${featuredArticle.slug || featuredArticle.id}`}>
+                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight hover:text-blue-600 transition-colors cursor-pointer">
+                  {featuredArticle.title}
+                </h1>
+              </Link>
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-4xl">
+                {featuredArticle.summary}
+              </p>
+              <div className="flex items-center space-x-6 text-sm text-gray-500">
+                <span className="font-medium">By {featuredArticle.authorName}</span>
+                <span>•</span>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-1" />
+                  {formatTimeAgo(featuredArticle.publishedAt)}
                 </div>
               </div>
-            </Link>
+            </div>
+            {featuredArticle.imageUrl && (
+              <div className="mb-8">
+                <img 
+                  src={featuredArticle.imageUrl} 
+                  alt={featuredArticle.title}
+                  className="w-full h-96 object-cover rounded-lg"
+                />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Article Grid */}
+        {/* Article Grid - New York Times Style */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {regularArticles.slice(0, 12).map((article) => (
-            <Link key={article.id} href={`/articles/${article.id}`}>
-              <article className="cursor-pointer group">
-                {article.imageUrl && (
-                  <div className="mb-4">
-                    <img 
-                      src={article.imageUrl} 
-                      alt={article.title}
-                      className="w-full h-48 object-cover rounded group-hover:opacity-90 transition-opacity"
-                    />
-                  </div>
-                )}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-blue-600 text-xs font-bold uppercase tracking-wide">
-                      {article.category}
-                    </span>
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
-                    {article.title}
-                  </h2>
-                  <p className="text-gray-600 leading-relaxed line-clamp-3">
-                    {article.summary}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t border-gray-100">
-                    <span className="font-medium">{article.authorName}</span>
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{formatTimeAgo(article.publishedAt)}</span>
+          {regularArticles.slice(0, 9).map((article) => (
+            <article key={article.id} className="group">
+              <Link href={`/articles/${article.slug || article.id}`}>
+                <div className="cursor-pointer">
+                  {article.imageUrl && (
+                    <div className="mb-4 overflow-hidden rounded-lg">
+                      <img 
+                        src={article.imageUrl} 
+                        alt={article.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-blue-600 text-xs font-semibold uppercase tracking-wide">
+                        {article.category}
+                      </span>
+                      <span className="text-xs text-gray-500">{formatTimeAgo(article.publishedAt)}</span>
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight">
+                      {article.title}
+                    </h2>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {article.summary}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span className="font-medium">{article.authorName}</span>
+                      <div className="flex items-center space-x-4">
+                        <span className="flex items-center">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          {article.viewCount || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </article>
-            </Link>
+              </Link>
+            </article>
           ))}
         </div>
 
-        {articles.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No articles available at the moment.</p>
-          </div>
-        )}
+        {/* More Articles Link */}
+        <div className="mt-12 text-center">
+          <Link href="/articles">
+            <span className="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+              View All Articles
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -13,26 +13,31 @@ export async function generateArticleWithGrounding(topic: string, category: stri
   category: string;
   tags: string[];
   relatedSymbols: string[];
+  slug: string;
 }> {
   try {
-    const prompt = `Search for the latest news about "${topic}" and write a comprehensive financial news article. The article should be:
+    const prompt = `Search for the latest news about "${topic}" and write a succinct, objective financial news article. The article should be:
     
     1. Based on current, real events from your search results
     2. Professional and informative for financial readers
-    3. 400-600 words in length
-    4. Include market implications and analysis
+    3. 400-600 words in length (concise but comprehensive)
+    4. Include specific market data, numbers, and metrics
     5. Written for category: ${category}
+    6. Focus on objective reporting with verifiable facts
+    7. Include relevant financial metrics and context
+    8. No speculation or opinion - just facts and analysis
     
     Please provide the response in JSON format with these exact fields:
-    - title: An engaging, professional headline
-    - content: Full article text (400-600 words)
-    - summary: Brief 2-3 sentence summary
-    - authorName: Professional journalist name
+    - title: Clear, informative headline (no clickbait, factual)
+    - content: Full article text (400-600 words) with clear paragraphs
+    - summary: Brief 2-sentence summary with key facts
+    - authorName: Professional financial journalist name
     - category: "${category}"
     - tags: Array of 3-4 relevant tags
     - relatedSymbols: Array of related stock/crypto symbols if applicable
+    - slug: URL-friendly slug based on the title (lowercase, dashes, no special characters)
     
-    Use Google Search to find current information about this topic.`;
+    Use Google Search to find current information about this topic. Write in a Bloomberg/Reuters style - authoritative, objective, data-driven, and concise.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash-exp",
@@ -47,9 +52,10 @@ export async function generateArticleWithGrounding(topic: string, category: stri
             authorName: { type: "string" },
             category: { type: "string" },
             tags: { type: "array", items: { type: "string" } },
-            relatedSymbols: { type: "array", items: { type: "string" } }
+            relatedSymbols: { type: "array", items: { type: "string" } },
+            slug: { type: "string" }
           },
-          required: ["title", "content", "summary", "authorName", "category", "tags", "relatedSymbols"]
+          required: ["title", "content", "summary", "authorName", "category", "tags", "relatedSymbols", "slug"]
         }
       },
       contents: prompt,

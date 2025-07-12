@@ -73,17 +73,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/articles/:id', async (req, res) => {
+  app.get('/api/articles/:identifier', async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const article = await storage.getArticle(id);
+      const identifier = req.params.identifier;
+      let article;
+      
+      // Check if identifier is a number (ID) or string (slug)
+      if (/^\d+$/.test(identifier)) {
+        const id = parseInt(identifier);
+        article = await storage.getArticle(id);
+        if (article) {
+          await storage.updateArticleViews(id);
+        }
+      } else {
+        // It's a slug
+        article = await storage.getArticleBySlug(identifier);
+        if (article) {
+          await storage.updateArticleViewsBySlug(identifier);
+        }
+      }
       
       if (!article) {
         return res.status(404).json({ error: 'Article not found' });
       }
-
-      // Update view count
-      await storage.updateArticleViews(id);
       
       res.json(article);
     } catch (error) {

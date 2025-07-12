@@ -5,12 +5,12 @@ import { Link } from "wouter";
 import type { Article } from "@shared/schema";
 
 export default function ArticlePage() {
-  const [match, params] = useRoute('/articles/:id');
-  const articleId = params?.id;
+  const [match, params] = useRoute('/articles/:identifier');
+  const articleIdentifier = params?.identifier;
 
   const { data: article, isLoading } = useQuery<Article>({
-    queryKey: [`/api/articles/${articleId}`],
-    enabled: !!articleId,
+    queryKey: [`/api/articles/${articleIdentifier}`],
+    enabled: !!articleIdentifier,
   });
 
   const formatTimeAgo = (date: string) => {

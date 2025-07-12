@@ -12,8 +12,10 @@ export interface IStorage {
   getFeaturedArticles(limit?: number): Promise<Article[]>;
   getArticlesByCategory(category: string, limit?: number): Promise<Article[]>;
   getArticle(id: number): Promise<Article | undefined>;
+  getArticleBySlug(slug: string): Promise<Article | undefined>;
   createArticle(article: InsertArticle): Promise<Article>;
   updateArticleViews(id: number): Promise<void>;
+  updateArticleViewsBySlug(slug: string): Promise<void>;
   updateArticleShares(id: number): Promise<void>;
   searchArticles(query: string, limit?: number): Promise<Article[]>;
   
@@ -86,6 +88,14 @@ export class DatabaseStorage implements IStorage {
     return article || undefined;
   }
 
+  async getArticleBySlug(slug: string): Promise<Article | undefined> {
+    const [article] = await db
+      .select()
+      .from(articles)
+      .where(eq(articles.slug, slug));
+    return article || undefined;
+  }
+
   async createArticle(article: InsertArticle): Promise<Article> {
     const [newArticle] = await db
       .insert(articles)
@@ -99,6 +109,13 @@ export class DatabaseStorage implements IStorage {
       .update(articles)
       .set({ viewCount: sql`${articles.viewCount} + 1` })
       .where(eq(articles.id, id));
+  }
+
+  async updateArticleViewsBySlug(slug: string): Promise<void> {
+    await db
+      .update(articles)
+      .set({ viewCount: sql`${articles.viewCount} + 1` })
+      .where(eq(articles.slug, slug));
   }
 
   async updateArticleShares(id: number): Promise<void> {

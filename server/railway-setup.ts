@@ -92,6 +92,7 @@ async function createDatabaseTables(pool: Pool) {
     CREATE TABLE IF NOT EXISTS articles (
       id SERIAL PRIMARY KEY,
       title TEXT NOT NULL,
+      slug TEXT UNIQUE,
       content TEXT NOT NULL,
       summary TEXT NOT NULL,
       category TEXT NOT NULL,
@@ -105,6 +106,24 @@ async function createDatabaseTables(pool: Pool) {
       share_count INTEGER DEFAULT 0,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     )
+  `);
+
+  // Add slug column if it doesn't exist (for existing tables)
+  await pool.query(`
+    ALTER TABLE articles ADD COLUMN IF NOT EXISTS slug TEXT;
+  `);
+
+  // Update existing articles to have slugs
+  await pool.query(`
+    UPDATE articles 
+    SET slug = LOWER(REPLACE(REPLACE(REPLACE(title, ' ', '-'), '''', ''), '?', ''))
+    WHERE slug IS NULL;
+  `);
+
+  // Add unique constraint on slug
+  await pool.query(`
+    ALTER TABLE articles ADD CONSTRAINT articles_slug_unique UNIQUE (slug)
+    ON CONFLICT DO NOTHING;
   `);
 
   // Market data table

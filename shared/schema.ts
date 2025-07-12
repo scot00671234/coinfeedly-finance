@@ -12,6 +12,7 @@ export const users = pgTable("users", {
 export const articles = pgTable("articles", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
   content: text("content").notNull(),
   summary: text("summary").notNull(),
   category: text("category").notNull(), // BREAKING, CRYPTO, STOCKS, COMMODITIES, EARNINGS

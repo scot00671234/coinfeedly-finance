@@ -1,5 +1,6 @@
 import { generateArticle, analyzeSentiment } from './gemini';
 import { storage } from '../storage';
+import { createSlug } from '../utils/slug';
 import type { NewsEvent, InsertArticle } from '@shared/schema';
 
 class ArticleGenerator {
@@ -40,6 +41,7 @@ class ArticleGenerator {
       
       const insertArticle: InsertArticle = {
         title: articleData.title,
+        slug: createSlug(articleData.title),
         content: articleData.content,
         summary: articleData.summary,
         category: articleData.category,
