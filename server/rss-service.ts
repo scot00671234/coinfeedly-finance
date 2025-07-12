@@ -222,6 +222,11 @@ export class RSSService {
             }
           } catch (error) {
             console.error('❌ Failed to save article:', error.message);
+            
+            // If database connection fails, log the article data for debugging
+            if (error.message.includes('ECONNREFUSED') || error.message.includes('connect')) {
+              console.log(`📄 Article ready for database: "${item.title.substring(0, 50)}..."`);
+            }
           }
         }
       }

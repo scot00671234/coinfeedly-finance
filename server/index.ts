@@ -18,6 +18,11 @@ async function startServer() {
   try {
     console.log("🚀 Starting Coin Feedly...");
 
+    // Set DATABASE_URL if not provided
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = "postgresql://runner@127.0.0.1:5432/coinfeedly";
+    }
+
     // Setup server routes and middleware first
     const server = await registerRoutes(app);
 
@@ -40,9 +45,12 @@ async function startServer() {
           console.log("✅ Database connected and initialized");
         } else {
           console.log("⚠️ Database initialization failed, but server is running");
+          console.log("💡 To connect database: Set DATABASE_URL environment variable");
+          console.log("💡 RSS feeds are processing and will be available once database is connected");
         }
       } catch (error) {
         console.log("⚠️ Database not available, running without database features");
+        console.log("💡 RSS feeds are being fetched but cannot be stored without database");
       }
     });
 

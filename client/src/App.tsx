@@ -182,7 +182,10 @@ function LiveFeed() {
         {articles.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-green-400 mb-2">🔄 SYSTEM INITIALIZING</div>
-            <div className="text-sm">Financial data streams coming online...</div>
+            <div className="text-sm">RSS feeds are processing...</div>
+            <div className="text-xs mt-2 text-gray-500">
+              Database connection required to display articles
+            </div>
           </div>
         ) : (
           <>
