@@ -9,8 +9,16 @@ export default function Home() {
   });
 
   const formatTimeAgo = (date: string) => {
+    if (!date) return 'Recently';
+    
     const now = new Date();
     const articleDate = new Date(date);
+    
+    // Check if date is valid
+    if (isNaN(articleDate.getTime())) {
+      return 'Recently';
+    }
+    
     const diffInMinutes = Math.floor((now.getTime() - articleDate.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 1) return 'Just now';

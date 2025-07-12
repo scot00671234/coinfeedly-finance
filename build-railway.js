@@ -345,7 +345,8 @@ async function createTables() {
       related_symbols TEXT[],
       views INTEGER DEFAULT 0,
       shares INTEGER DEFAULT 0,
-      image_url VARCHAR(500)
+      image_url VARCHAR(500),
+      slug VARCHAR(600) UNIQUE
     )\`,
     \`CREATE TABLE IF NOT EXISTS market_data (
       id SERIAL PRIMARY KEY,
@@ -383,11 +384,67 @@ app.get('/api/articles', async (req, res) => {
   }
   
   try {
-    const result = await pool.query('SELECT * FROM articles ORDER BY published_at DESC LIMIT 20');
+    const limit = parseInt(req.query.limit) || 20;
+    const category = req.query.category;
+    const featured = req.query.featured === 'true';
+    
+    let query = 'SELECT * FROM articles';
+    let params = [];
+    
+    if (category) {
+      query += ' WHERE UPPER(category) = UPPER($1)';
+      params.push(category);
+    } else if (featured) {
+      query += ' WHERE featured = true';
+    }
+    
+    query += ' ORDER BY published_at DESC LIMIT $' + (params.length + 1);
+    params.push(limit);
+    
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
     console.error('Articles query error:', error);
     res.json([]);
+  }
+});
+
+// Add article by ID or slug endpoint
+app.get('/api/articles/:identifier', async (req, res) => {
+  if (!pool || !dbInitialized) {
+    return res.json({ error: 'Database not ready' });
+  }
+  
+  try {
+    const identifier = req.params.identifier;
+    let query, params;
+    
+    // Check if identifier is numeric (ID) or string (slug)
+    if (/^\d+$/.test(identifier)) {
+      query = 'SELECT * FROM articles WHERE id = $1';
+      params = [parseInt(identifier)];
+    } else {
+      query = 'SELECT * FROM articles WHERE slug = $1';
+      params = [identifier];
+    }
+    
+    const result = await pool.query(query, params);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Article not found' });
+    }
+    
+    // Update view count
+    if (/^\d+$/.test(identifier)) {
+      await pool.query('UPDATE articles SET views = views + 1 WHERE id = $1', [parseInt(identifier)]);
+    } else {
+      await pool.query('UPDATE articles SET views = views + 1 WHERE slug = $1', [identifier]);
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Article fetch error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -454,15 +511,21 @@ async function generateArticle() {
     console.log('🤖 Generating article...');
     
     const topics = [
-      'Federal Reserve interest rate decisions and market impact',
-      'Technology stock earnings season analysis',
-      'Cryptocurrency market trends and regulatory developments',
-      'Global economic indicators and recession concerns',
-      'Energy sector performance amid geopolitical tensions',
-      'Banking sector stability and credit market conditions'
+      { topic: 'Federal Reserve interest rate decisions and market impact', category: 'markets' },
+      { topic: 'Technology stock earnings season analysis', category: 'tech' },
+      { topic: 'Bitcoin and Ethereum price movements and market sentiment', category: 'crypto' },
+      { topic: 'Global economic indicators and recession concerns', category: 'world' },
+      { topic: 'Energy sector performance amid geopolitical tensions', category: 'companies' },
+      { topic: 'Banking sector stability and credit market conditions', category: 'markets' },
+      { topic: 'DeFi protocols and smart contract security developments', category: 'crypto' },
+      { topic: 'Artificial intelligence startup funding and IPO activity', category: 'tech' },
+      { topic: 'US inflation data and consumer spending patterns', category: 'us' },
+      { topic: 'Brexit impact on UK financial services sector', category: 'uk' }
     ];
     
-    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    const randomTopicData = topics[Math.floor(Math.random() * topics.length)];
+    const randomTopic = randomTopicData.topic;
+    const topicCategory = randomTopicData.category;
     
     const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=\${process.env.GEMINI_API_KEY}\`, {
       method: 'POST',
@@ -472,16 +535,19 @@ async function generateArticle() {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: \`Write a comprehensive financial news article about: \${randomTopic}. 
+            text: \`Search for current news and write a comprehensive financial news article about: \${randomTopic}. 
+
+            Base the article on REAL recent news and market developments. Include specific data, numbers, and actual market movements.
             
             Format the response as JSON with these exact fields:
             {
-              "title": "Article title (engaging and professional)",
-              "content": "Full article content (minimum 800 words, well-structured with multiple paragraphs)",
-              "summary": "Brief summary (100-150 words)"
+              "title": "Article title (engaging and professional, no clickbait)",
+              "content": "Full article content (400-600 words, well-structured with multiple paragraphs)",
+              "summary": "Brief summary (2-3 sentences with key facts)",
+              "slug": "url-friendly-slug-based-on-title"
             }
             
-            Make it sound like it was written by a professional financial journalist. Include market analysis, expert opinions, and current market context. Do not use placeholder text.\`
+            Make it sound like it was written by a professional financial journalist. Include market analysis, expert opinions, and current market context. Use real data and facts, not placeholder text.\`
           }]
         }],
         generationConfig: {
@@ -511,18 +577,26 @@ async function generateArticle() {
     let insertRetries = 3;
     while (insertRetries > 0) {
       try {
+        // Generate slug if not provided
+        const slug = articleData.slug || articleData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 100);
+        
         await pool.query(\`
-          INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols, slug)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         \`, [
           articleData.title,
           articleData.content,
           articleData.summary,
-          'Markets',
-          'AI Financial Analyst',
-          Math.random() < 0.3,
-          ['ai-generated', 'markets', 'analysis'],
-          ['SPY', 'BTC', 'ETH']
+          topicCategory,
+          'Coin Feedly',
+          Math.random() < 0.25,
+          [topicCategory, 'finance', 'news'],
+          topicCategory === 'crypto' ? ['BTC', 'ETH'] : ['SPY', 'QQQ'],
+          slug
         ]);
         
         console.log(\`✅ Generated article: \${articleData.title.substring(0, 50)}...\`);

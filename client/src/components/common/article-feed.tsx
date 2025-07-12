@@ -15,15 +15,25 @@ export default function ArticleFeed({ category, title, description }: ArticleFee
   });
 
   const formatTimeAgo = (date: string) => {
+    if (!date) return 'Recently';
+    
     const now = new Date();
     const articleDate = new Date(date);
+    
+    // Check if date is valid
+    if (isNaN(articleDate.getTime())) {
+      return 'Recently';
+    }
+    
     const diffInMinutes = Math.floor((now.getTime() - articleDate.getTime()) / (1000 * 60));
     
+    if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    if (diffInDays < 30) return `${diffInDays}d ago`;
+    return articleDate.toLocaleDateString();
   };
 
   const featuredArticle = articles.find(article => article.featured);
@@ -62,40 +72,42 @@ export default function ArticleFeed({ category, title, description }: ArticleFee
         {/* Featured Article */}
         {featuredArticle && (
           <div className="mb-12">
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="p-8">
-                <div className="flex items-center space-x-2 mb-4">
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded uppercase">
-                    {featuredArticle.category}
-                  </span>
-                  <TrendingUp className="h-4 w-4 text-red-500" />
-                  <span className="text-red-500 text-xs font-semibold">FEATURED</span>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-                  {featuredArticle.title}
-                </h2>
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  {featuredArticle.summary}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span className="font-medium">{featuredArticle.authorName}</span>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatTimeAgo(featuredArticle.publishedAt)}
+            <Link href={`/articles/${featuredArticle.slug || featuredArticle.id}`}>
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer">
+                <div className="p-8">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded uppercase">
+                      {featuredArticle.category}
+                    </span>
+                    <TrendingUp className="h-4 w-4 text-red-500" />
+                    <span className="text-red-500 text-xs font-semibold">FEATURED</span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight hover:text-blue-600 transition-colors">
+                    {featuredArticle.title}
+                  </h2>
+                  <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                    {featuredArticle.summary}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span className="font-medium">By Coin Feedly</span>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {formatTimeAgo(featuredArticle.publishedAt)}
+                      </div>
+                      <span>{featuredArticle.viewCount || 0} views</span>
                     </div>
-                    <span>{featuredArticle.views} views</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         )}
 
         {/* Article Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {regularArticles.map((article) => (
-            <Link key={article.id} href={`/article/${article.id}`}>
+            <Link key={article.id} href={`/articles/${article.slug || article.id}`}>
               <article className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer">
                 <div className="flex items-center space-x-2 mb-3">
                   <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded uppercase">
@@ -107,7 +119,7 @@ export default function ArticleFeed({ category, title, description }: ArticleFee
                   </div>
                 </div>
                 
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-tight">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 leading-tight hover:text-blue-600 transition-colors">
                   {article.title}
                 </h3>
                 
@@ -116,8 +128,8 @@ export default function ArticleFeed({ category, title, description }: ArticleFee
                 </p>
                 
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="font-medium">{article.authorName}</span>
-                  <span>{article.views} views</span>
+                  <span className="font-medium">By Coin Feedly</span>
+                  <span>{article.viewCount || 0} views</span>
                 </div>
               </article>
             </Link>
