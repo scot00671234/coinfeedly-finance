@@ -111,6 +111,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Article view tracking for user engagement
+  app.post('/api/articles/:id/view', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updateArticleViews(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update view count' });
+    }
+  });
+
   // Market Data API
   app.get('/api/market-data', async (req, res) => {
     try {
