@@ -3,7 +3,6 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
-import { articleGenerator } from "./article-generator";
 import { rssService } from "./rss-service";
 import { z } from "zod";
 
@@ -179,7 +178,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Start real-time services
   rssService.start();
-  articleGenerator.start();
 
   return httpServer;
 }

@@ -262,7 +262,7 @@ function AppContent() {
           </div>
           <div className="text-right">
             <div className="text-green-400 text-sm font-mono scanning-line">LIVE</div>
-            <div className="text-gray-400 text-xs">All content curated for maximum retention</div>
+            <div className="text-gray-400 text-xs">Real-time news from trusted sources</div>
           </div>
         </div>
       </header>
@@ -275,7 +275,7 @@ function AppContent() {
       {/* Footer */}
       <footer className="bg-gray-900 border-t border-gray-800 px-6 py-4 mt-16">
         <div className="text-center text-gray-400 text-xs">
-          <p>CLASSIFIED FINANCIAL INTELLIGENCE • REAL-TIME MARKET ANALYSIS</p>
+          <p>FINANCIAL NEWS AGGREGATOR • POWERED BY RSS FEEDS • REAL-TIME UPDATES</p>
         </div>
       </footer>
     </div>

@@ -1,5 +1,5 @@
 import { users, articles, marketData, newsEvents, type User, type InsertUser, type Article, type InsertArticle, type MarketData, type InsertMarketData, type NewsEvent, type InsertNewsEvent } from "@shared/schema";
-import { db } from "./db";
+import { db } from "./database";
 import { eq, desc, and, inArray, sql, or, like } from "drizzle-orm";
 
 export interface IStorage {

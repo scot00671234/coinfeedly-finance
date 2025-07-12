@@ -18,13 +18,7 @@ async function startServer() {
   try {
     console.log("🚀 Starting Coin Feedly...");
 
-    // Initialize database
-    const dbSuccess = await initializeDatabase();
-    if (!dbSuccess) {
-      throw new Error("Database initialization failed");
-    }
-
-    // Setup server routes and middleware
+    // Setup server routes and middleware first
     const server = await registerRoutes(app);
 
     // Setup development or production assets
@@ -35,8 +29,21 @@ async function startServer() {
     }
 
     // Start the server
-    server.listen(port, "0.0.0.0", () => {
+    server.listen(port, "0.0.0.0", async () => {
       console.log(`✅ Server running on http://0.0.0.0:${port}`);
+      
+      // Try to initialize database after server is running
+      try {
+        console.log("🔄 Attempting database initialization...");
+        const dbSuccess = await initializeDatabase();
+        if (dbSuccess) {
+          console.log("✅ Database connected and initialized");
+        } else {
+          console.log("⚠️ Database initialization failed, but server is running");
+        }
+      } catch (error) {
+        console.log("⚠️ Database not available, running without database features");
+      }
     });
 
   } catch (error) {

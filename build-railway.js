@@ -495,124 +495,141 @@ app.get('/api/debug', (req, res) => {
   });
 });
 
-// Article generation function
-async function generateArticle() {
-  if (!process.env.GEMINI_API_KEY) {
-    console.log('⚠️  Article generation skipped (missing Gemini API key)');
-    return;
+// RSS feed sources for authentic news
+const RSS_SOURCES = [
+  {
+    url: 'https://cointelegraph.com/rss',
+    category: 'Crypto',
+    name: 'CoinTelegraph'
+  },
+  {
+    url: 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+    category: 'Crypto', 
+    name: 'CoinDesk'
+  },
+  {
+    url: 'https://feeds.bloomberg.com/markets/news.rss',
+    category: 'Markets',
+    name: 'Bloomberg'
+  },
+  {
+    url: 'https://feeds.feedburner.com/techcrunch',
+    category: 'Tech',
+    name: 'TechCrunch'
   }
-  
-  if (!pool || !dbInitialized) {
-    console.log('⚠️  Article generation skipped (database not ready)');
-    return;
-  }
+];
 
+// RSS parsing function
+async function fetchRSSFeed(url) {
   try {
-    console.log('🤖 Generating article...');
+    console.log(\`📡 Fetching RSS from \${url}\`);
     
-    const topics = [
-      { topic: 'Federal Reserve interest rate decisions and market impact', category: 'markets' },
-      { topic: 'Technology stock earnings season analysis', category: 'tech' },
-      { topic: 'Bitcoin and Ethereum price movements and market sentiment', category: 'crypto' },
-      { topic: 'Global economic indicators and recession concerns', category: 'world' },
-      { topic: 'Energy sector performance amid geopolitical tensions', category: 'companies' },
-      { topic: 'Banking sector stability and credit market conditions', category: 'markets' },
-      { topic: 'DeFi protocols and smart contract security developments', category: 'crypto' },
-      { topic: 'Artificial intelligence startup funding and IPO activity', category: 'tech' },
-      { topic: 'US inflation data and consumer spending patterns', category: 'us' },
-      { topic: 'Brexit impact on UK financial services sector', category: 'uk' }
-    ];
-    
-    const randomTopicData = topics[Math.floor(Math.random() * topics.length)];
-    const randomTopic = randomTopicData.topic;
-    const topicCategory = randomTopicData.category;
-    
-    const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=\${process.env.GEMINI_API_KEY}\`, {
-      method: 'POST',
+    const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: \`Search for current news and write a comprehensive financial news article about: \${randomTopic}. 
-
-            Base the article on REAL recent news and market developments. Include specific data, numbers, and actual market movements.
-            
-            Format the response as JSON with these exact fields:
-            {
-              "title": "Article title (engaging and professional, no clickbait)",
-              "content": "Full article content (400-600 words, well-structured with multiple paragraphs)",
-              "summary": "Brief summary (2-3 sentences with key facts)",
-              "slug": "url-friendly-slug-based-on-title"
-            }
-            
-            Make it sound like it was written by a professional financial journalist. Include market analysis, expert opinions, and current market context. Use real data and facts, not placeholder text.\`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      })
+        'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)'
+      }
     });
 
     if (!response.ok) {
-      throw new Error(\`Gemini API error: \${response.status}\`);
+      throw new Error(\`HTTP \${response.status}\`);
     }
 
-    const data = await response.json();
-    const generatedText = data.candidates[0].content.parts[0].text;
+    const text = await response.text();
+    const items = [];
+
+    // Extract items using regex (simple approach)
+    const itemMatches = text.match(/<item[^>]*>(.*?)<\\/item>/gs) || [];
     
-    const jsonMatch = generatedText.match(/\\{[\\s\\S]*\\}/);
-    if (!jsonMatch) {
-      throw new Error('Could not parse JSON from Gemini response');
-    }
-    
-    const articleData = JSON.parse(jsonMatch[0]);
-    
-    // Try to insert into database with retry logic
-    let insertRetries = 3;
-    while (insertRetries > 0) {
-      try {
-        // Generate slug if not provided
-        const slug = articleData.slug || articleData.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '')
-          .substring(0, 100);
-        
-        await pool.query(\`
-          INSERT INTO articles (title, content, summary, category, author_name, featured, tags, related_symbols, slug)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        \`, [
-          articleData.title,
-          articleData.content,
-          articleData.summary,
-          topicCategory,
-          'Coin Feedly',
-          Math.random() < 0.25,
-          [topicCategory, 'finance', 'news'],
-          topicCategory === 'crypto' ? ['BTC', 'ETH'] : ['SPY', 'QQQ'],
-          slug
-        ]);
-        
-        console.log(\`✅ Generated article: \${articleData.title.substring(0, 50)}...\`);
-        break;
-      } catch (dbError) {
-        insertRetries--;
-        if (insertRetries === 0) {
-          throw new Error(\`Database insert failed after retries: \${dbError.message}\`);
+    for (const itemMatch of itemMatches.slice(0, 10)) { // Limit to 10 items
+      const titleMatch = itemMatch.match(/<title[^>]*>(.*?)<\\/title>/s);
+      const descMatch = itemMatch.match(/<description[^>]*>(.*?)<\\/description>/s);
+      const linkMatch = itemMatch.match(/<link[^>]*>(.*?)<\\/link>/s);
+      const pubDateMatch = itemMatch.match(/<pubDate[^>]*>(.*?)<\\/pubDate>/s);
+
+      if (titleMatch && descMatch) {
+        const title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+        const description = descMatch[1].replace(/<[^>]*>/g, '').trim();
+        const link = linkMatch ? linkMatch[1].trim() : '';
+        const pubDate = pubDateMatch ? pubDateMatch[1].trim() : new Date().toISOString();
+
+        if (title && description && title.length > 10) {
+          items.push({
+            title,
+            description,
+            link,
+            pubDate: new Date(pubDate).toISOString()
+          });
         }
-        console.log(\`⚠️  Database insert failed, retrying... (\${insertRetries} attempts left)\`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
+
+    return items;
   } catch (error) {
-    console.error('❌ Error generating article:', error.message);
+    console.error(\`❌ RSS fetch failed for \${url}:\`, error.message);
+    return [];
   }
+}
+
+// Process RSS feeds and save to database
+async function processRSSFeeds() {
+  if (!pool || !dbInitialized) {
+    console.log('⚠️  RSS processing skipped (database not ready)');
+    return;
+  }
+
+  console.log('🔄 Processing RSS feeds...');
+  
+  for (const source of RSS_SOURCES) {
+    try {
+      const items = await fetchRSSFeed(source.url);
+      
+      for (const item of items) {
+        try {
+          // Check if article already exists
+          const existingCheck = await pool.query(
+            'SELECT id FROM articles WHERE title = $1', 
+            [item.title]
+          );
+          
+          if (existingCheck.rows.length > 0) {
+            continue; // Skip if already exists
+          }
+          
+          // Create slug from title
+          const slug = item.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .substring(0, 100);
+          
+          // Insert article
+          await pool.query(\`
+            INSERT INTO articles (title, content, summary, category, author_name, featured, slug, published_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          \`, [
+            item.title,
+            item.description + '\\n\\n' + (item.link ? \`Read more at: \${item.link}\` : ''),
+            item.description.substring(0, 200) + '...',
+            source.category,
+            source.name,
+            Math.random() < 0.2,
+            slug,
+            item.pubDate
+          ]);
+          
+          console.log(\`✅ Saved RSS article: \${item.title.substring(0, 50)}...\`);
+          
+        } catch (insertError) {
+          console.error(\`❌ Failed to save article from \${source.name}:\`, insertError.message);
+        }
+      }
+      
+    } catch (error) {
+      console.error(\`❌ Failed to process RSS from \${source.name}:\`, error.message);
+    }
+  }
+  
+  console.log('✅ RSS processing complete');
 }
 
 // Start database initialization
@@ -620,22 +637,22 @@ initializeDatabase().then(success => {
   if (success) {
     console.log('✅ Railway database ready');
     
-    // Generate initial article immediately
-    console.log('🤖 Starting immediate article generation...');
-    generateArticle().then(() => {
-      console.log('✅ Initial article generation completed');
+    // Process RSS feeds immediately
+    console.log('📡 Starting immediate RSS processing...');
+    processRSSFeeds().then(() => {
+      console.log('✅ Initial RSS processing completed');
     }).catch(error => {
-      console.error('❌ Initial article generation failed:', error);
+      console.error('❌ Initial RSS processing failed:', error);
     });
     
-    // Start article generation after database is ready
+    // Start RSS processing after database is ready
     setTimeout(() => {
-      console.log('🤖 Starting periodic article generation...');
-      generateArticle();
-      // Generate new articles every 30 minutes
+      console.log('📡 Starting periodic RSS processing...');
+      processRSSFeeds();
+      // Process RSS feeds every 30 minutes
       setInterval(() => {
-        console.log('🤖 Periodic article generation triggered');
-        generateArticle();
+        console.log('📡 Periodic RSS processing triggered');
+        processRSSFeeds();
       }, 30 * 60 * 1000);
     }, 10000); // 10 seconds delay
   } else {
