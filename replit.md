@@ -254,6 +254,9 @@ The application uses four main entities:
   - Improved article generation prompts to create more objective, succinct content with real data
   - Updated crypto page with modern design and proper category filtering
   - Fixed duplicate header issue and created elegant NYT-style header with date display
+  - Redesigned homepage with compact featured article section and newspaper-style Top Stories layout
+  - Created NYT-style three-column layout with primary stories and "Most Popular" sidebar
+  - Enhanced header with three-tier design: date bar, logo/tagline, and navigation menu
   - All requested improvements implemented: article reading works, SEO-friendly URLs, category filtering, modern UI, better content quality
 
 ## User Preferences
