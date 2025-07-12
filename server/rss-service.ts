@@ -31,6 +31,16 @@ const RSS_SOURCES = [
     url: 'https://feeds.reuters.com/reuters/businessNews',
     category: 'Finance',
     name: 'Reuters'
+  },
+  {
+    url: 'https://feeds.feedburner.com/techcrunch',
+    category: 'Tech',
+    name: 'TechCrunch'
+  },
+  {
+    url: 'https://feeds.reuters.com/reuters/technologyNews',
+    category: 'Tech',
+    name: 'Reuters Tech'
   }
 ];
 
@@ -67,7 +77,19 @@ export class RSSService {
         if (titleMatch && descMatch) {
           // Try to get full content from content:encoded or use description
           const contentMatch = itemMatch.match(/<content:encoded[^>]*>(.*?)<\/content:encoded>/s);
-          const fullContent = contentMatch ? this.cleanText(contentMatch[1]) : this.cleanText(descMatch[1]);
+          let fullContent = contentMatch ? this.cleanText(contentMatch[1]) : this.cleanText(descMatch[1]);
+          
+          // If content is still short, try to fetch from the original URL
+          if (fullContent.length < 500 && linkMatch) {
+            try {
+              const fullArticle = await this.fetchFullArticle(linkMatch[1].trim());
+              if (fullArticle && fullArticle.length > fullContent.length) {
+                fullContent = fullArticle;
+              }
+            } catch (error) {
+              console.log(`⚠️ Could not fetch full article from ${linkMatch[1]}`);
+            }
+          }
           
           items.push({
             title: this.cleanText(titleMatch[1]),
@@ -82,6 +104,49 @@ export class RSSService {
     } catch (error) {
       console.error(`❌ RSS fetch failed for ${url}:`, error.message);
       return [];
+    }
+  }
+
+  private async fetchFullArticle(url: string): Promise<string | null> {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; NewsBot/1.0)'
+        }
+      });
+
+      if (!response.ok) return null;
+
+      const html = await response.text();
+      
+      // Extract main content using common selectors
+      const contentSelectors = [
+        'article',
+        '.post-content',
+        '.article-content',
+        '.entry-content',
+        '.content',
+        'main',
+        '[role="main"]'
+      ];
+      
+      for (const selector of contentSelectors) {
+        const match = html.match(new RegExp(`<${selector}[^>]*>(.*?)<\/${selector}>`, 'gs'));
+        if (match && match[0]) {
+          const content = this.cleanText(match[0]);
+          if (content.length > 300) {
+            return content;
+          }
+        }
+      }
+
+      // Fallback: extract paragraphs
+      const paragraphs = html.match(/<p[^>]*>(.*?)<\/p>/gs) || [];
+      const fullText = paragraphs.map(p => this.cleanText(p)).join('\n\n');
+      
+      return fullText.length > 300 ? fullText : null;
+    } catch (error) {
+      return null;
     }
   }
 
@@ -123,6 +188,21 @@ export class RSSService {
             });
 
             if (!existingArticle) {
+              // Categorize more precisely based on content
+              let finalCategory = source.category;
+              const title = item.title.toLowerCase();
+              const content = item.description.toLowerCase();
+              
+              if (title.includes('bitcoin') || title.includes('crypto') || content.includes('cryptocurrency')) {
+                finalCategory = 'Crypto';
+              } else if (title.includes('stock') || title.includes('market') || content.includes('trading')) {
+                finalCategory = 'Markets';
+              } else if (title.includes('tech') || title.includes('ai') || content.includes('technology')) {
+                finalCategory = 'Tech';
+              } else if (title.includes('finance') || title.includes('bank') || content.includes('financial')) {
+                finalCategory = 'Finance';
+              }
+
               const article: InsertArticle = {
                 title: item.title,
                 slug: this.createSlug(item.title),
@@ -130,10 +210,10 @@ export class RSSService {
                 summary: item.description.length > 200 ? 
                   item.description.substring(0, 200) + '...' : 
                   item.description,
-                category: source.category,
+                category: finalCategory,
                 authorName: source.name,
                 featured: Math.random() > 0.8,
-                tags: [source.category.toLowerCase(), 'news'],
+                tags: [finalCategory.toLowerCase(), 'news'],
                 relatedSymbols: []
               };
 

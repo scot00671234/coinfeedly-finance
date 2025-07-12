@@ -197,11 +197,30 @@ export default function ArticleModal({ article, isOpen, onClose }: ArticleModalP
               </div>
               <div className="p-4 bg-gray-800/30 rounded">
                 <textarea 
+                  id="comment-input"
                   className="w-full bg-gray-800 text-white p-3 rounded border border-gray-700 focus:border-green-400 focus:outline-none" 
                   placeholder="Share your thoughts on this article..."
                   rows={3}
                 />
-                <button className="mt-2 px-4 py-2 bg-green-400 text-black rounded hover:bg-green-500 transition-colors">
+                <button 
+                  onClick={() => {
+                    const input = document.getElementById('comment-input') as HTMLTextAreaElement;
+                    if (input.value.trim()) {
+                      const newComment = document.createElement('div');
+                      newComment.className = 'p-4 bg-gray-800/50 rounded mb-4';
+                      newComment.innerHTML = `
+                        <div class="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                          <span class="w-6 h-6 bg-green-400 rounded-full flex items-center justify-center text-xs text-black">A</span>
+                          <span>Anonymous • just now</span>
+                        </div>
+                        <p class="text-gray-300">${input.value}</p>
+                      `;
+                      input.parentElement?.parentElement?.insertBefore(newComment, input.parentElement);
+                      input.value = '';
+                    }
+                  }}
+                  className="mt-2 px-4 py-2 bg-green-400 text-black rounded hover:bg-green-500 transition-colors"
+                >
                   Post Comment
                 </button>
               </div>

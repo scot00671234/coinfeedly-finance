@@ -64,14 +64,50 @@ function FeedItem({ item, onReadFull }: { item: any; onReadFull: (item: any) => 
 
 // Main feed component with user retention features
 function LiveFeed() {
+  const [page, setPage] = useState(1);
+  const [allArticles, setAllArticles] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const { data: articles = [], isLoading } = useQuery({
-    queryKey: ['feed'],
+    queryKey: ['feed', page],
     queryFn: async () => {
-      const response = await fetch('/api/articles');
+      const response = await fetch(`/api/articles?limit=20&offset=${(page - 1) * 20}`);
       return response.json();
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
+
+  // Handle infinite scroll
+  useEffect(() => {
+    if (articles.length > 0) {
+      if (page === 1) {
+        setAllArticles(articles);
+      } else {
+        setAllArticles(prev => [...prev, ...articles]);
+      }
+      setHasMore(articles.length === 20);
+      setIsLoadingMore(false);
+    }
+  }, [articles, page]);
+
+  const loadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      setIsLoadingMore(true);
+      setPage(prev => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoadingMore, hasMore]);
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
@@ -133,13 +169,21 @@ function LiveFeed() {
             <div className="text-sm">Financial data streams coming online...</div>
           </div>
         ) : (
-          articles.map((item: any) => (
-            <FeedItem 
-              key={item.id} 
-              item={item} 
-              onReadFull={handleReadFull}
-            />
-          ))
+          <>
+            {allArticles.map((item: any) => (
+              <FeedItem 
+                key={item.id} 
+                item={item} 
+                onReadFull={handleReadFull}
+              />
+            ))}
+            {isLoadingMore && (
+              <div className="text-center py-8 text-gray-400">
+                <div className="text-green-400 mb-2">🔄 LOADING MORE</div>
+                <div className="text-sm">Fetching additional articles...</div>
+              </div>
+            )}
+          </>
         )}
       </div>
       
@@ -217,7 +261,7 @@ function AppContent() {
             <p className="text-gray-400 text-sm">Real-time financial data • Stay informed, stay ahead</p>
           </div>
           <div className="text-right">
-            <div className="text-green-400 text-sm font-mono scanning-line">SYSTEM ACTIVE</div>
+            <div className="text-green-400 text-sm font-mono scanning-line">LIVE</div>
             <div className="text-gray-400 text-xs">All content curated for maximum retention</div>
           </div>
         </div>
