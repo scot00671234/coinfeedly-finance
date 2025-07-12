@@ -1,7 +1,7 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
-import { runMigrations, seedInitialData } from "./migrate";
+import { setupDatabase } from "./simple-migrate";
 
 const app = express();
 const port = parseInt(process.env.PORT ?? "5000");
@@ -18,14 +18,11 @@ async function startServer() {
   try {
     console.log("🚀 Starting Coin Feedly server...");
 
-    // Run database migrations
-    const migrationResult = await runMigrations();
-    if (!migrationResult.success) {
-      throw new Error("Database migration failed");
+    // Setup database
+    const dbResult = await setupDatabase();
+    if (!dbResult.success) {
+      throw new Error("Database setup failed");
     }
-
-    // Seed initial data
-    await seedInitialData();
 
     // Setup server routes and middleware
     const server = await registerRoutes(app);

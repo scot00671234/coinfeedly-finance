@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
-import { articleService } from "./services/article-service";
+import { simpleArticleService } from "./simple-article-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -166,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Start simple article generation service
-  articleService.startPeriodicGeneration();
+  simpleArticleService.startGeneration();
 
   return httpServer;
 }
