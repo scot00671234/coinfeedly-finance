@@ -46,26 +46,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* New York Times Style Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-gray-900">Coin Feedly</h1>
-              <nav className="hidden md:flex space-x-6">
-                <Link href="/crypto" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Crypto</Link>
-                <Link href="/markets" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Markets</Link>
-                <Link href="/companies" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Companies</Link>
-                <Link href="/tech" className="text-gray-600 hover:text-gray-900 text-sm font-medium">Technology</Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Featured Article - New York Times Style */}
         {featuredArticle && (
