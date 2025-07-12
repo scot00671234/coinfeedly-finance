@@ -1,29 +1,33 @@
 import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import * as schema from '@shared/schema';
 
-// Super simple migration system
-export async function setupDatabase() {
-  console.log('🔄 Setting up database...');
+// Database connection and setup
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
+
+export const db = drizzle(pool, { schema });
+export { pool };
+
+// Simple database initialization
+export async function initializeDatabase() {
+  console.log('🔄 Initializing database...');
   
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-
   try {
     // Test connection
     await pool.query('SELECT NOW()');
     console.log('✅ Database connected');
 
-    // Create all tables in one go
+    // Create tables
     await pool.query(`
-      -- Users table
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
       );
 
-      -- Articles table with proper slug handling
       CREATE TABLE IF NOT EXISTS articles (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
@@ -41,7 +45,6 @@ export async function setupDatabase() {
         share_count INTEGER DEFAULT 0
       );
 
-      -- Market data table
       CREATE TABLE IF NOT EXISTS market_data (
         id SERIAL PRIMARY KEY,
         symbol TEXT NOT NULL,
@@ -57,7 +60,6 @@ export async function setupDatabase() {
         UNIQUE(symbol, type)
       );
 
-      -- News events table
       CREATE TABLE IF NOT EXISTS news_events (
         id SERIAL PRIMARY KEY,
         headline TEXT,
@@ -71,30 +73,28 @@ export async function setupDatabase() {
       );
     `);
 
-    // Fix any existing articles without slugs
+    // Fix slug column for existing articles
     await pool.query(`
       UPDATE articles 
-      SET slug = LOWER(REGEXP_REPLACE(REGEXP_REPLACE(title, '[^a-zA-Z0-9\\s]', '', 'g'), '\\s+', '-', 'g')) || '-' || id
-      WHERE slug IS NULL OR slug = '';
+      SET slug = LOWER(REPLACE(REPLACE(title, ' ', '-'), '''', '')) || '-' || id
+      WHERE slug IS NULL;
     `);
 
-    // Add sample data if none exists
-    const result = await pool.query('SELECT COUNT(*) FROM articles');
-    if (parseInt(result.rows[0].count) === 0) {
+    // Add sample data if empty
+    const articleCount = await pool.query('SELECT COUNT(*) FROM articles');
+    if (parseInt(articleCount.rows[0].count) === 0) {
       await pool.query(`
         INSERT INTO articles (title, slug, content, summary, category, author_name, featured)
         VALUES 
-          ('Welcome to Coin Feedly', 'welcome-to-coin-feedly-1', 'Welcome to your financial news platform. This is a sample article to get you started.', 'Welcome article for the platform.', 'Markets', 'Editorial Team', true),
-          ('Market Overview', 'market-overview-2', 'Current market conditions show mixed signals across various sectors.', 'Mixed market signals observed.', 'Markets', 'Market Analyst', false);
+          ('Financial Markets Overview', 'financial-markets-overview-1', 'Current market conditions show steady performance across major sectors with technology leading gains.', 'Markets show steady performance with tech leading.', 'Markets', 'Financial Team', true),
+          ('Cryptocurrency Market Update', 'cryptocurrency-market-update-2', 'Digital assets continue to show volatility with Bitcoin and Ethereum maintaining their positions as market leaders.', 'Crypto markets show continued volatility.', 'Crypto', 'Crypto Analyst', false);
       `);
-      console.log('✅ Sample data added');
     }
 
-    console.log('✅ Database setup completed');
-    return { pool, success: true };
-
+    console.log('✅ Database initialized successfully');
+    return true;
   } catch (error) {
-    console.error('❌ Database setup failed:', error);
-    return { pool: null, success: false };
+    console.error('❌ Database initialization failed:', error);
+    return false;
   }
 }

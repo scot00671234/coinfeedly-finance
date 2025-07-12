@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
-import { simpleArticleService } from "./simple-article-service";
+import { articleGenerator } from "./article-generator";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -165,8 +165,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
-  // Start simple article generation service
-  simpleArticleService.startGeneration();
+  // Start article generation
+  articleGenerator.start();
 
   return httpServer;
 }

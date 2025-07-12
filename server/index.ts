@@ -1,7 +1,7 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
-import { setupDatabase } from "./simple-migrate";
+import { initializeDatabase } from "./database";
 
 const app = express();
 const port = parseInt(process.env.PORT ?? "5000");
@@ -16,12 +16,12 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 async function startServer() {
   try {
-    console.log("🚀 Starting Coin Feedly server...");
+    console.log("🚀 Starting Coin Feedly...");
 
-    // Setup database
-    const dbResult = await setupDatabase();
-    if (!dbResult.success) {
-      throw new Error("Database setup failed");
+    // Initialize database
+    const dbSuccess = await initializeDatabase();
+    if (!dbSuccess) {
+      throw new Error("Database initialization failed");
     }
 
     // Setup server routes and middleware
@@ -40,7 +40,7 @@ async function startServer() {
     });
 
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
+    console.error("❌ Server startup failed:", error);
     process.exit(1);
   }
 }
