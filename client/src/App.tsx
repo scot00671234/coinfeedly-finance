@@ -69,13 +69,18 @@ function LiveFeed() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const { data: articles = [], isLoading } = useQuery({
+  const { data: articles = [], isLoading, error } = useQuery({
     queryKey: ['feed', page],
     queryFn: async () => {
       const response = await fetch(`/api/articles?limit=20&offset=${(page - 1) * 20}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       return response.json();
     },
     refetchInterval: 30000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Handle infinite scroll
@@ -154,7 +159,18 @@ function LiveFeed() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-green-400 text-sm animate-pulse">
-          <div className="scanning-line">Loading financial intelligence...</div>
+          <div className="scanning-line">Loading financial data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-400 mb-4">Unable to load articles</div>
+        <div className="text-gray-400 text-sm">
+          RSS feeds are being processed. Please check back in a few minutes.
         </div>
       </div>
     );

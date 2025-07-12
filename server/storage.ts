@@ -54,30 +54,46 @@ export class DatabaseStorage implements IStorage {
 
   // Articles - only return real RSS data
   async getArticles(limit = 50, offset = 0): Promise<Article[]> {
-    return await db
-      .select()
-      .from(articles)
-      .orderBy(desc(articles.publishedAt))
-      .limit(limit)
-      .offset(offset);
+    try {
+      return await db
+        .select()
+        .from(articles)
+        .orderBy(desc(articles.publishedAt))
+        .limit(limit)
+        .offset(offset);
+    } catch (error) {
+      console.error('Database error fetching articles:', error);
+      // Return empty array when database is unavailable
+      return [];
+    }
   }
 
   async getFeaturedArticles(limit = 10): Promise<Article[]> {
-    return await db
-      .select()
-      .from(articles)
-      .where(eq(articles.featured, true))
-      .orderBy(desc(articles.publishedAt))
-      .limit(limit);
+    try {
+      return await db
+        .select()
+        .from(articles)
+        .where(eq(articles.featured, true))
+        .orderBy(desc(articles.publishedAt))
+        .limit(limit);
+    } catch (error) {
+      console.error('Database error fetching featured articles:', error);
+      return [];
+    }
   }
 
   async getArticlesByCategory(category: string, limit = 20): Promise<Article[]> {
-    return await db
-      .select()
-      .from(articles)
-      .where(eq(articles.category, category))
-      .orderBy(desc(articles.publishedAt))
-      .limit(limit);
+    try {
+      return await db
+        .select()
+        .from(articles)
+        .where(eq(articles.category, category))
+        .orderBy(desc(articles.publishedAt))
+        .limit(limit);
+    } catch (error) {
+      console.error('Database error fetching articles by category:', error);
+      return [];
+    }
   }
 
   async getArticle(id: number): Promise<Article | undefined> {
@@ -126,19 +142,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchArticles(query: string, limit = 20): Promise<Article[]> {
-    const searchTerm = `%${query}%`;
-    return await db
-      .select()
-      .from(articles)
-      .where(
-        or(
-          like(articles.title, searchTerm),
-          like(articles.content, searchTerm),
-          like(articles.summary, searchTerm)
+    try {
+      const searchTerm = `%${query}%`;
+      return await db
+        .select()
+        .from(articles)
+        .where(
+          or(
+            like(articles.title, searchTerm),
+            like(articles.content, searchTerm),
+            like(articles.summary, searchTerm)
+          )
         )
-      )
-      .orderBy(desc(articles.publishedAt))
-      .limit(limit);
+        .orderBy(desc(articles.publishedAt))
+        .limit(limit);
+    } catch (error) {
+      console.error('Database error searching articles:', error);
+      return [];
+    }
   }
 
   // Market Data

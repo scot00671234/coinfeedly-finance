@@ -10,30 +10,32 @@ export function useWebSocket() {
     const ws = connectWebSocket();
     wsRef.current = ws;
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        switch (data.type) {
-          case 'market-data-update':
-            // Invalidate market data queries
-            queryClient.invalidateQueries({ queryKey: ['/api/market-data'] });
-            queryClient.invalidateQueries({ queryKey: ['/api/market-data/gainers'] });
-            queryClient.invalidateQueries({ queryKey: ['/api/market-data/losers'] });
-            break;
-            
-          case 'new-article':
-            // Invalidate article queries
-            queryClient.invalidateQueries({ queryKey: ['/api/articles'] });
-            break;
-            
-          default:
-            console.log('Unknown WebSocket message type:', data.type);
+    if (ws) {
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          switch (data.type) {
+            case 'market-data-update':
+              // Invalidate market data queries
+              queryClient.invalidateQueries({ queryKey: ['/api/market-data'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/market-data/gainers'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/market-data/losers'] });
+              break;
+              
+            case 'new-article':
+              // Invalidate article queries
+              queryClient.invalidateQueries({ queryKey: ['feed'] });
+              break;
+              
+            default:
+              console.log('Unknown WebSocket message type:', data.type);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
         }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
+      };
+    }
 
     return () => {
       if (wsRef.current) {
