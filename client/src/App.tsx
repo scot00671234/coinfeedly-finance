@@ -2,13 +2,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import ArticleModal from './components/ArticleModal';
 
 const queryClient = new QueryClient();
 
 // Real-time feed item component with user retention features
-function FeedItem({ item, onExpand }: { item: any; onExpand: (item: any) => void }) {
+function FeedItem({ item, onReadFull }: { item: any; onReadFull: (item: any) => void }) {
   const [isNew, setIsNew] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     setIsNew(true);
@@ -16,17 +16,15 @@ function FeedItem({ item, onExpand }: { item: any; onExpand: (item: any) => void
     return () => clearTimeout(timer);
   }, [item.id]);
 
-  const handleExpand = () => {
-    setIsExpanded(!isExpanded);
-    onExpand(item);
+  const handleReadFull = () => {
+    onReadFull(item);
   };
 
   return (
     <div className={cn(
-      "border-l-2 border-gray-800 pl-4 py-3 transition-all duration-300 cursor-pointer hover:bg-gray-900/50",
-      isNew && "border-l-green-400 bg-green-900/10",
-      isExpanded && "border-l-green-400 bg-gray-900/30"
-    )} onClick={handleExpand}>
+      "border-l-2 border-gray-800 pl-4 py-3 transition-all duration-300 cursor-pointer hover:bg-gray-900/50 hover:border-l-green-400",
+      isNew && "border-l-green-400 bg-green-900/10"
+    )} onClick={handleReadFull}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
@@ -40,29 +38,23 @@ function FeedItem({ item, onExpand }: { item: any; onExpand: (item: any) => void
           <h3 className="text-white font-medium mb-2 leading-tight hover:text-green-400 transition-colors">
             {item.title}
           </h3>
-          <p className="text-gray-300 text-sm leading-relaxed">
-            {isExpanded ? item.content : item.summary}
+          <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
+            {item.summary}
           </p>
-          {isExpanded && (
-            <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
-              <button className="hover:text-green-400 transition-colors">
-                💬 Discuss
-              </button>
-              <button className="hover:text-green-400 transition-colors">
-                🔗 Share
-              </button>
-              <button className="hover:text-green-400 transition-colors">
-                📊 Analysis
-              </button>
-            </div>
-          )}
+          <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+            <span className="hover:text-green-400 transition-colors">
+              📖 Read Full Article
+            </span>
+            <span>👁️ {item.viewCount || 0} views</span>
+            <span>🔗 {item.shareCount || 0} shares</span>
+          </div>
         </div>
         <div className="flex items-center gap-2 ml-4">
           {isNew && (
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           )}
-          <div className="text-gray-400 text-xs">
-            {isExpanded ? '▼' : '▶'}
+          <div className="text-green-400 text-xs font-mono">
+            READ →
           </div>
         </div>
       </div>
@@ -83,6 +75,7 @@ function LiveFeed() {
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [readingTime, setReadingTime] = useState(0);
 
   useEffect(() => {
@@ -109,10 +102,16 @@ function LiveFeed() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleArticleExpand = (article: any) => {
+  const handleReadFull = (article: any) => {
     setSelectedArticle(article);
+    setIsModalOpen(true);
     // Track article views
     fetch(`/api/articles/${article.id}/view`, { method: 'POST' }).catch(() => {});
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedArticle(null);
   };
 
   if (isLoading) {
@@ -126,22 +125,30 @@ function LiveFeed() {
   }
 
   return (
-    <div className="space-y-0">
-      {articles.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <div className="text-green-400 mb-2">🔄 SYSTEM INITIALIZING</div>
-          <div className="text-sm">Financial intelligence streams coming online...</div>
-        </div>
-      ) : (
-        articles.map((item: any) => (
-          <FeedItem 
-            key={item.id} 
-            item={item} 
-            onExpand={handleArticleExpand}
-          />
-        ))
-      )}
-    </div>
+    <>
+      <div className="space-y-0">
+        {articles.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-green-400 mb-2">🔄 SYSTEM INITIALIZING</div>
+            <div className="text-sm">Financial intelligence streams coming online...</div>
+          </div>
+        ) : (
+          articles.map((item: any) => (
+            <FeedItem 
+              key={item.id} 
+              item={item} 
+              onReadFull={handleReadFull}
+            />
+          ))
+        )}
+      </div>
+      
+      <ArticleModal 
+        article={selectedArticle}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
+    </>
   );
 }
 
