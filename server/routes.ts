@@ -3,10 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertArticleSchema, insertMarketDataSchema, insertNewsEventSchema } from "@shared/schema";
-import { realNewsGenerator } from "./services/real-news-generator";
-import { realTimeNewsService } from "./services/real-time-news";
-import { yahooFinanceService } from "./services/yahoo-finance";
-import { coinGeckoService } from "./services/coingecko";
+import { articleService } from "./services/article-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -163,118 +160,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Real-time data fetching and article generation
-  async function fetchAndUpdateMarketData() {
-    try {
-      // Fetch stock data
-      const stockSymbols = ['SPY', 'QQQ', 'AAPL', 'TSLA', 'NVDA', 'MSFT', 'GOOGL', 'AMZN', 'META', 'AMD'];
-      const stockData = await yahooFinanceService.getQuotes(stockSymbols);
-      
-      // Fetch crypto data
-      const cryptoData = await coinGeckoService.getTopCoins(10);
-      
-      // Update market data and broadcast changes
-      const updatedData = [];
-      
-      for (const stock of stockData) {
-        const updated = await storage.upsertMarketData({
-          symbol: stock.symbol,
-          name: stock.name,
-          price: stock.price.toString(),
-          change: stock.change.toString(),
-          changePercent: stock.changePercent.toString(),
-          volume: stock.volume?.toString(),
-          type: 'stock',
-          metadata: { 
-            currency: stock.currency,
-            exchange: stock.exchange 
-          }
-        });
-        updatedData.push(updated);
-      }
-      
-      for (const crypto of cryptoData) {
-        const updated = await storage.upsertMarketData({
-          symbol: crypto.symbol.toUpperCase(),
-          name: crypto.name,
-          price: crypto.price.toString(),
-          change: crypto.change.toString(),
-          changePercent: crypto.changePercent.toString(),
-          marketCap: crypto.marketCap?.toString(),
-          type: 'crypto',
-          metadata: { 
-            rank: crypto.rank,
-            circulatingSupply: crypto.circulatingSupply 
-          }
-        });
-        updatedData.push(updated);
-      }
-      
-      // Broadcast updates to WebSocket clients
-      broadcast({
-        type: 'market-data-update',
-        data: updatedData
-      });
-      
-      console.log(`Updated ${updatedData.length} market data entries`);
-    } catch (error) {
-      console.error('Error fetching market data:', error);
-    }
-  }
-
-  async function processNewsEvents() {
-    try {
-      // Generate market-based articles using real-time news service
-      console.log('Generating market analysis articles...');
-      await realTimeNewsService.generateRealTimeArticles();
-      console.log('Market analysis articles completed');
-    } catch (error) {
-      console.error('Error generating market articles:', error);
-    }
-  }
-
-  // Generate real-time news with web grounding
-  async function generateRealTimeNews() {
-    try {
-      console.log('Generating real-time news with web grounding...');
-      await realTimeNewsService.generateRealTimeArticles();
-      console.log('Real-time news generation completed');
-    } catch (error) {
-      console.error('Error generating real-time news:', error);
-    }
-  }
-
-  // Test route to trigger article generation
-  app.post("/api/test-articles", async (req, res) => {
-    try {
-      await realTimeNewsService.generateRealTimeArticles();
-      res.json({ message: "Articles generated successfully" });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to generate articles" });
-    }
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
-  // Initial market data fetch
-  fetchAndUpdateMarketData().catch(console.error);
-  
-  // Update market data every 15 minutes
-  setInterval(fetchAndUpdateMarketData, 15 * 60 * 1000);
-  
-  // Initial article generation (async, don't block server startup)
-  processNewsEvents().catch(console.error);
-
-  // Generate market analysis articles every 45 minutes  
-  // Wait 60 seconds before starting to ensure previous processes are ready
-  setTimeout(() => {
-    setInterval(processNewsEvents, 45 * 60 * 1000);
-  }, 60000);
-
-  // Generate real-time news with web grounding every 30 minutes (increased from 20 to reduce rate limit hits)
-  // Wait 30 seconds before starting to ensure database is ready
-  setTimeout(() => {
-    generateRealTimeNews().catch(console.error);
-    setInterval(generateRealTimeNews, 30 * 60 * 1000);
-  }, 30000);
+  // Start simple article generation service
+  articleService.startPeriodicGeneration();
 
   return httpServer;
 }

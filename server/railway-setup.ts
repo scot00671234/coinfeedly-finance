@@ -113,17 +113,41 @@ async function createDatabaseTables(pool: Pool) {
     ALTER TABLE articles ADD COLUMN IF NOT EXISTS slug TEXT;
   `);
 
-  // Update existing articles to have slugs
+  // Update existing articles to have slugs with proper URL formatting
   await pool.query(`
     UPDATE articles 
-    SET slug = LOWER(REPLACE(REPLACE(REPLACE(title, ' ', '-'), '''', ''), '?', ''))
-    WHERE slug IS NULL;
+    SET slug = LOWER(
+      REGEXP_REPLACE(
+        REGEXP_REPLACE(
+          REGEXP_REPLACE(title, '[^a-zA-Z0-9\\s-]', '', 'g'),
+          '\\s+', '-', 'g'
+        ),
+        '-+', '-', 'g'
+      )
+    )
+    WHERE slug IS NULL OR slug = '';
   `);
 
-  // Add unique constraint on slug
+  // Make sure all slugs are unique by adding ID suffix if needed
   await pool.query(`
-    ALTER TABLE articles ADD CONSTRAINT articles_slug_unique UNIQUE (slug)
-    ON CONFLICT DO NOTHING;
+    UPDATE articles 
+    SET slug = slug || '-' || id 
+    WHERE id IN (
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (PARTITION BY slug ORDER BY id) as rn 
+        FROM articles 
+        WHERE slug IS NOT NULL
+      ) t WHERE rn > 1
+    );
+  `);
+
+  // Add unique constraint on slug if it doesn't exist
+  await pool.query(`
+    DO $$ BEGIN
+      ALTER TABLE articles ADD CONSTRAINT articles_slug_unique UNIQUE (slug);
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
   `);
 
   // Market data table

@@ -1,0 +1,111 @@
+u reached the start of the range → Jul 12, 2025, 4:26 PM
+
+Starting Container
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> coin-feedly@1.0.0 start
+
+> node index.js
+
+ 
+
+✅ Serving static files from: /app/dist/public
+
+🚀 Server running on port 8080
+
+✅ Database connected
+
+✅ Database tables ready
+
+✅ Railway database ready
+
+🤖 Starting immediate article generation...
+
+🤖 Generating article...
+
+⚠️  Database insert failed, retrying... (2 attempts left)
+
+⚠️  Database insert failed, retrying... (1 attempts left)
+
+🤖 Starting periodic article generation...
+
+🤖 Generating article...
+
+❌ Error generating article: Database insert failed after retries: column "slug" of relation "articles" does not exist
+
+✅ Initial article generation completed
+
+⚠️  Database insert failed, retrying... (2 attempts left)
+
+⚠️  Database insert failed, retrying... (1 attempts left)
+
+❌ Error generating article: Database insert failed after retries: column "slug" of relation "articles" does not exist
+
+Article fetch error: error: column "slug" does not exist
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async file:///app/dist/index.js:180:20 {
+
+  length: 104,
+
+  severity: 'ERROR',
+
+  code: '42703',
+
+  detail: undefined,
+
+  hint: undefined,
+
+  position: '30',
+
+  internalPosition: undefined,
+
+  internalQuery: undefined,
+
+  where: undefined,
+
+  schema: undefined,
+
+  table: undefined,
+
+  column: undefined,
+
+  dataType: undefined,
+
+  constraint: undefined,
+
+  file: 'parse_relation.c',
+
+  line: '3722',
+
+  routine: 'errorMissingColumn'
+
+}
+
+Article fetch error: error: column "slug" does not exist
+
+    at /app/node_modules/pg-pool/index.js:45:11
+
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+    at async file:///app/dist/index.js:180:20 {
+
+  length: 104,
+
+  severity: 'ERROR',
+
+  code: '42703',
+
+  detail: undefined,
+
+  hint: undefined,
+
+  position: '30',
+
+  internalPosition: undefined,
